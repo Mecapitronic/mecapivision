@@ -10,7 +10,8 @@
         "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
         "source=${localEnv:XAUTHORITY},target=/home/vscode/.Xauthority,type=bind"
     ],
-    "postCreateCommand": "sudo apt update && sudo apt install -y libgl1 x11-xserver-utils",
+    // install opencv for autocompletion in vscode
+    "postCreateCommand": "sudo apt update && sudo apt install -y libgl1 x11-xserver-utils && pip install opencv-python",
     "customizations": {
         "vscode": {
             "extensions": [

@@ -7,3 +7,7 @@ ouvrez dans le devcontainer avec vscode pour que ça soit plus simple.
 ```python
 uv run main.py
 ```
+
+## Sources and Docs
+
+* [OpenCV documentation](https://docs.opencv.org/4.x/d5/dae/tutorial_aruco_detection.html)
