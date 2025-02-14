@@ -5,15 +5,12 @@ from cv2 import aruco
 
 def main():
     print("Hello from vision!")
+    print_aruco()
 
 
-def print_aruco():
-    markerImage: cv.Mat = cv.Mat((200, 200), cv.CV_8UC1)
-    all_aruco_wards: aruco.Dictionary = aruco.getPredefinedDictionary(
-        cv.aruco.DICT_4X4_50
-    )
-
-    aruco.generateImageMarker(all_aruco_wards, 23, 200, markerImage, 1)
+def print_aruco(size_in_pixels=200):
+    all_aruco_wards: aruco.Dictionary = aruco.getPredefinedDictionary(aruco.DICT_4X4_50)
+    markerImage = aruco.generateImageMarker(all_aruco_wards, 23, size_in_pixels)
     cv.imwrite("marker23.png", markerImage)
 
 
@@ -37,4 +34,4 @@ def detect_corners():
 
 
 if __name__ == "__main__":
-    print_aruco()
+    main()
