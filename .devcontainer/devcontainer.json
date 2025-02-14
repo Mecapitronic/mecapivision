@@ -13,11 +13,6 @@
     "postCreateCommand": "sudo apt update && sudo apt install -y libgl1 x11-xserver-utils",
     "customizations": {
         "vscode": {
-            "editor.formatOnSave": true,
-            "editor.rulers": [
-                90,
-                120
-            ],
             "extensions": [
                 "aaron-bond.better-comments",
                 "charliermarsh.ruff",
@@ -25,14 +20,9 @@
                 "GitHub.copilot",
                 "github.vscode-github-actions",
                 "GitHub.vscode-pull-request-github",
-                "kevinrose.vsc-python-indent",
                 "ms-python.python",
                 "tamasfe.even-better-toml"
-            ],
-            "files.eol": "\n",
-            "files.insertFinalNewline": true,
-            "files.trimTrailingWhitespace": true
+            ]
         }
     }
-}
 }
