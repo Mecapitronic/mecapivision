@@ -1,17 +1,54 @@
+from typing import Sequence
+
 import cv2 as cv
 import numpy as np
 from cv2 import aruco
+from cv2.typing import MatLike
+
+# source https://docs.opencv.org/4.x/singlemarkerssource.jpg
 
 
 def main():
     print("Hello from vision!")
-    print_aruco()
+    detect_aruco()
 
 
 def print_aruco(size_in_pixels=200):
     all_aruco_wards: aruco.Dictionary = aruco.getPredefinedDictionary(aruco.DICT_4X4_50)
-    markerImage = aruco.generateImageMarker(all_aruco_wards, 23, size_in_pixels)
+    markerImage: MatLike = aruco.generateImageMarker(
+        all_aruco_wards, 23, size_in_pixels
+    )
     cv.imwrite("marker23.png", markerImage)
+
+
+def detect_aruco():
+    inputImage: MatLike = cv.imread("multiple_aruco.jpg", cv.IMREAD_COLOR)
+
+    detectorParams: cv.aruco.DetectorParameters = cv.aruco.DetectorParameters()
+    dictionary: cv.aruco.Dictionary = cv.aruco.getPredefinedDictionary(
+        cv.aruco.DICT_6X6_250
+    )
+    detector = cv.aruco.ArucoDetector(dictionary, detectorParams)
+
+    result: tuple[
+        Sequence[MatLike],
+        MatLike,
+        Sequence[MatLike],
+    ] = detector.detectMarkers(inputImage)
+
+    (markerCorners, markerIds, rejectedCandidates) = result
+
+    print("results:\n")
+    print(markerCorners)
+    print(markerIds)
+    print(rejectedCandidates)
+
+    outputImage: MatLike = inputImage.copy()
+    aruco.drawDetectedMarkers(outputImage, markerCorners, markerIds)
+
+    cv.imshow("output", outputImage)
+    cv.waitKey(0)
+    cv.destroyAllWindows()
 
 
 def detect_corners():
