@@ -5,12 +5,14 @@ import numpy as np
 from cv2 import aruco
 from cv2.typing import MatLike
 
+from .detect_aruco import detect_aruco_camera
+
 # source https://docs.opencv.org/4.x/singlemarkerssource.jpg
 
 
 def main():
     print("Hello from vision!")
-    detect_aruco()
+    detect_aruco_camera()
 
 
 def print_aruco(size_in_pixels=200):
