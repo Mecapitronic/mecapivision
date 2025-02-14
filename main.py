@@ -1,18 +1,23 @@
-import numpy as np
 import cv2 as cv
+import numpy as np
 from cv2 import aruco
+
 
 def main():
     print("Hello from vision!")
 
+
 def print_aruco():
     markerImage: cv.Mat = cv.Mat((200, 200), cv.CV_8UC1)
-    all_aruco_wards: aruco.Dictionary = aruco.getPredefinedDictionary(cv.aruco.DICT_4X4_50)
+    all_aruco_wards: aruco.Dictionary = aruco.getPredefinedDictionary(
+        cv.aruco.DICT_4X4_50
+    )
 
     aruco.generateImageMarker(all_aruco_wards, 23, 200, markerImage, 1)
     cv.imwrite("marker23.png", markerImage)
 
-def detect_corners():   
+
+def detect_corners():
     filename = "chessboard.jpg"
     img = cv.imread(filename)
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
