@@ -1,3 +1,4 @@
+# source https://docs.opencv.org/4.11.0/dc/dbb/tutorial_py_calibration.html
 import glob
 
 import cv2 as cv
