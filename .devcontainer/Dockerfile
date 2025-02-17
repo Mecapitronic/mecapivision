@@ -8,6 +8,7 @@ ARG USER_GID=$USER_UID
 # nodejs is required for SonarQube
 RUN apt update \
     && DEBIAN_FRONTEND=noninteractive apt -y install --no-install-recommends \
+    git-lfs \
     libgl1 \
     nodejs \
     x11-xserver-utils \
