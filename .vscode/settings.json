@@ -20,4 +20,12 @@
         "connectionId": "mecapitronic",
         "projectKey": "Mecapitronic_vision"
     },
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "python.analysis.extraPaths": [
+        "./src"
+    ],
 }

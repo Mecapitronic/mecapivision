@@ -94,7 +94,7 @@ def undistort_image(img, mtx, dist):
 
     # crop the image
     x, y, w, h = roi
-    dst = dst[y : y + h, x : x + w]
+    dst = dst[y : y + h, x : x + w]  # noqa: E203
 
     cv.imshow("original", img)
     cv.imshow("calibrated", dst)
