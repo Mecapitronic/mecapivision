@@ -1,9 +1,9 @@
-from copy import deepcopy
+from glob import glob
 from typing import Sequence
 
 import cv2 as cv
 from cv2 import aruco
-from cv2.typing import MatLike
+from cv2.typing import MatLike, Scalar
 
 
 def get_aruco_tag(aruco_id: int, size_in_pixels: int = 200) -> MatLike:
@@ -45,7 +45,36 @@ def detect_aruco(image_path: str) -> None:
     cv.waitKey(0)
 
 
-def detect_aruco_camera() -> None:
+def list_cameras() -> list[str]:
+    available_cameras: list[str] = []
+    for cam in glob("/dev/video*"):
+        camera = cv.VideoCapture(cam)
+        if not camera.isOpened():
+            print(f"camera {cam} is not available")
+        else:
+            print(f"camera {cam} is available")
+            frame_width = int(camera.get(cv.CAP_PROP_FRAME_WIDTH))
+            frame_height = int(camera.get(cv.CAP_PROP_FRAME_HEIGHT))
+            print(f"camera frame width: {frame_width}")
+            print(f"camera frame height: {frame_height}")
+
+            available_cameras.append(cam)
+            camera.release()
+
+    return available_cameras
+
+    # def get_camera_parameters() -> tuple:
+    #     cv::Mat cameraMatrix, distCoeffs;
+    #     # You can read camera parameters from tutorial_camera_params.yml
+    #     readCameraParameters(filename, cameraMatrix, distCoeffs); // This function is located in detect_markers.cpp
+    #     std::vector<cv::Vec3d> rvecs, tvecs;
+    #     cv::aruco::estimatePoseSingleMarkers(markerCorners, 0.05, cameraMatrix, distCoeffs, rvecs, tvecs);
+    # return cameraMatrix, distCoeffs
+
+
+def detect_aruco_camera(
+    camera_id: int = 0, estimate_pose: bool = True, show_rejected: bool = True
+) -> None:
     # init aruco detector
     detector_params: cv.aruco.DetectorParameters = cv.aruco.DetectorParameters()
     dictionary: cv.aruco.Dictionary = cv.aruco.getPredefinedDictionary(
@@ -54,19 +83,10 @@ def detect_aruco_camera() -> None:
     detector = cv.aruco.ArucoDetector(dictionary, detector_params)
 
     # init camera capture
-    cam_id = 0
-    camera = cv.VideoCapture(cam_id)
-
-    # Get the default frame width and height
-    frame_width = int(camera.get(cv.CAP_PROP_FRAME_WIDTH))
-    frame_height = int(camera.get(cv.CAP_PROP_FRAME_HEIGHT))
-    # waitTime: int = 10
-
-    print(f"camera frame width: {frame_width}")
-    print(f"camera frame height: {frame_height}")
+    camera = cv.VideoCapture(camera_id)
 
     # set coordinate system
-    obj_points = cv.Mat((4, 1))  # cv.CV_32FC3
+    # obj_points = cv.Mat((4, 1))  # cv.CV_32FC3
     # objPoints.ptr<Vec3f>(0)[0] = Vec3f(-markerLength/2.f, markerLength/2.f, 0);
     # objPoints.ptr<Vec3f>(0)[1] = Vec3f(markerLength/2.f, markerLength/2.f, 0);
     # objPoints.ptr<Vec3f>(0)[2] = Vec3f(markerLength/2.f, -markerLength/2.f, 0);
@@ -85,12 +105,11 @@ def detect_aruco_camera() -> None:
         tick = cv.getTickCount()
 
         # detect markers and estimate pose
-        corners, ids, rejected = detector.detectMarkers(image)
-        n_markers: int = len(corners)
-        n_ids: int = len(ids)
+        marker_corners, marker_ids, rejected_candidates = detector.detectMarkers(image)
+        n_markers: int = len(marker_corners)
+        n_ids: int = len(marker_ids)
 
-        rvecs = deepcopy(n_markers)
-        tvecs = deepcopy(n_markers)
+        # calibration data from tutorial_camera_params.yml
 
         if estimate_pose and n_ids > 0:
             # Calculate pose for each marker
@@ -99,7 +118,7 @@ def detect_aruco_camera() -> None:
                     obj_points, cam_matrix, dist_coeffs, corners[i], rvecs[i], tvecs[i]
                 )
                 if not ret:
-                    print(f"Pose estimation failed for marker {ids[i]}")
+                    print(f"Pose estimation failed for marker {marker_ids[i]}")
                     continue
 
         current_time = (cv.getTickCount() - tick) / cv.getTickFrequency()
@@ -116,7 +135,7 @@ def detect_aruco_camera() -> None:
         image_copy = image.copy()
 
         if n_ids > 0:
-            cv.aruco.drawDetectedMarkers(image_copy, corners, ids)
+            cv.aruco.drawDetectedMarkers(image_copy, marker_corners, marker_ids)
 
             if estimate_pose:
                 for i in range(n_ids):
@@ -130,9 +149,12 @@ def detect_aruco_camera() -> None:
                         2,
                     )
 
-        if show_rejected and len(rejected):
+        if show_rejected and len(rejected_candidates):
             cv.aruco.drawDetectedMarkers(
-                imageCopy, rejected, no_array(), Scalar(100, 0, 255)
+                image_copy,
+                rejected,
+                no_array(),
+                Scalar(100, 0, 255),
             )
 
         # Display the captured frame
