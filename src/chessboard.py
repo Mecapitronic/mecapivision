@@ -1,10 +1,9 @@
 import cv2 as cv
 import numpy as np
+from cv2.typing import MatLike
 
-chessboard = "images/chessboard.jpg"
 
-
-def detect_corners(filename: str = chessboard):
+def detect_corners(filename: str) -> MatLike:
     img = cv.imread(filename)
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
@@ -17,6 +16,4 @@ def detect_corners(filename: str = chessboard):
     # Threshold for an optimal value, it may vary depending on the image.
     img[dst > 0.01 * dst.max()] = [0, 0, 255]
 
-    cv.imshow("dst", img)
-    if cv.waitKey(0) & 0xFF == 27:
-        cv.destroyAllWindows()
+    return img
