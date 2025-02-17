@@ -1,5 +1,7 @@
 from copy import deepcopy
+
 import cv2 as cv
+
 
 def detect_aruco_camera():
     # init aruco detector
@@ -49,7 +51,9 @@ def detect_aruco_camera():
         if estimatePose and nIds > 0:
             # Calculate pose for each marker
             for i in range(nMarkers):
-                ret, one, two  = cv.solvePnP(objPoints, camMatrix, distCoeffs, corners[i], rvecs[i], tvecs[i])
+                ret, one, two = cv.solvePnP(
+                    objPoints, camMatrix, distCoeffs, corners[i], rvecs[i], tvecs[i]
+                )
                 if not ret:
                     print(f"Pose estimation failed for marker {ids[i]}")
                     continue
@@ -58,8 +62,10 @@ def detect_aruco_camera():
         totalTime += currentTime
         totalIterations += 1
 
-        if(totalIterations % 30 == 0):
-            print(f"Detection Time = {currentTime * 1000} ms (Mean = {1000 * totalTime / totalIterations} ms)")
+        if totalIterations % 30 == 0:
+            print(
+                f"Detection Time = {currentTime * 1000} ms (Mean = {1000 * totalTime / totalIterations} ms)"
+            )
 
         # draw results
         imageCopy = image.copy()
@@ -69,16 +75,24 @@ def detect_aruco_camera():
 
             if estimatePose:
                 for i in range(nIds):
-                    cv.drawFrameAxes(imageCopy, camMatrix, distCoeffs, rvecs[i], tvecs[i], markerLength * 1.5f, 2)
+                    cv.drawFrameAxes(
+                        imageCopy,
+                        camMatrix,
+                        distCoeffs,
+                        rvecs[i],
+                        tvecs[i],
+                        markerLength * 1.5,
+                        2,
+                    )
 
-
-        if showRejected and !rejected.empty():
-            cv.aruco.drawDetectedMarkers(imageCopy, rejected, noArray(), Scalar(100, 0, 255))
-
+        if showRejected and len(rejected):
+            cv.aruco.drawDetectedMarkers(
+                imageCopy, rejected, noArray(), Scalar(100, 0, 255)
+            )
 
         # Display the captured frame
-        cv.imshow('Camera', imageCopy)
+        cv.imshow("Camera", imageCopy)
         cv.waitKey(0)
         camera.release()
         cv.destroyAllWindows()
-        del(camera)
+        del camera
