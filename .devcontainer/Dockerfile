@@ -14,6 +14,3 @@ RUN apt update \
     && apt autopurge -y \
     && apt clean -y \
     && rm -rf /var/lib/apt/lists/*
-
-# install opencv for autocompletion in vscode
-RUN pip install opencv-python
