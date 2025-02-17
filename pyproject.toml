@@ -1,13 +1,10 @@
 [project]
-name = "vision"
+name = "mecapivision"
 version = "0.1.0"
-description = "detect aruco with a camera"
+description = "detect aruco tags with a camera"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = ["opencv-python>=4.11.0.86"]
-
-[flake8]
-max-line-length = 90
 
 [tool.pylint]
 max-line-length = 90
