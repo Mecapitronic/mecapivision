@@ -14,3 +14,9 @@ extension-pkg-allow-list = "cv2"
 
 [tool.ruff]
 line-length = 90
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.4",
+    "ruff>=0.9.6",
+]
