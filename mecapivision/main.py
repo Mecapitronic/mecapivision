@@ -11,7 +11,7 @@ def display_image(image_name: str, image: MatLike):
 
 
 def plop():
-    print("Hello from vision!")
+    print("Hello from mecapivision!")
 
     chess = detect_corners("images/chessboard.jpg")
     display_image("chess", chess)
