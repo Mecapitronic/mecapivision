@@ -54,5 +54,5 @@ jobs:
 
     - name: Test with pytest
       run: |
-        uv run python -m pytest tests
+        uv run --with pytest pytest tests
 
