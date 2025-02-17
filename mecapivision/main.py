@@ -1,5 +1,5 @@
 import cv2 as cv
-from aruco import detect_aruco, get_aruco_tag
+from aruco import detect_aruco, detect_aruco_camera, get_aruco_tag
 from chessboard import detect_corners
 from cv2.typing import MatLike
 
@@ -10,7 +10,7 @@ def display_image(image_name: str, image: MatLike):
     cv.destroyAllWindows()
 
 
-def main():
+def plop():
     print("Hello from vision!")
 
     chess = detect_corners("images/chessboard.jpg")
@@ -19,6 +19,10 @@ def main():
     display_image("aruco", get_aruco_tag(31))
 
     detect_aruco("images/aruco_tags_scene.jpg")
+
+
+def main():
+    detect_aruco_camera()
 
 
 if __name__ == "__main__":
