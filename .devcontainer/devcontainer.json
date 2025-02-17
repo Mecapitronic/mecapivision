@@ -25,6 +25,7 @@
                 "GitHub.copilot",
                 "github.vscode-github-actions",
                 "GitHub.vscode-pull-request-github",
+                "ms-python.mypy-type-checker",
                 "ms-python.python",
                 "SonarSource.sonarlint-vscode",
                 "tamasfe.even-better-toml"
