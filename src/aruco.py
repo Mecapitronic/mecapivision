@@ -1,15 +1,59 @@
 from copy import deepcopy
+from typing import Sequence
 
 import cv2 as cv
+from cv2 import aruco
+from cv2.typing import MatLike, Scalar
+
+
+def print_aruco(aruco_id: int, size_in_pixels: int = 200):
+    all_aruco_wards: aruco.Dictionary = aruco.getPredefinedDictionary(aruco.DICT_4X4_50)
+    markerImage: MatLike = aruco.generateImageMarker(
+        all_aruco_wards, aruco_id, size_in_pixels
+    )
+    cv.imshow("marker23", markerImage)
+    cv.waitKey(0)
+
+
+aruco_tags = "images/aruco_tags_scene.jpg"
+
+
+def detect_aruco(image_path: str = aruco_tags):
+    inputImage: MatLike = cv.imread(image_path, cv.IMREAD_COLOR)
+
+    detector_params: cv.aruco.DetectorParameters = cv.aruco.DetectorParameters()
+    dictionary: cv.aruco.Dictionary = cv.aruco.getPredefinedDictionary(
+        cv.aruco.DICT_6X6_250
+    )
+    detector = cv.aruco.ArucoDetector(dictionary, detector_params)
+
+    result: tuple[
+        Sequence[MatLike],
+        MatLike,
+        Sequence[MatLike],
+    ] = detector.detectMarkers(inputImage)
+
+    (markerCorners, markerIds, rejectedCandidates) = result
+
+    print("results:\n")
+    print(markerCorners)
+    print(markerIds)
+    print(rejectedCandidates)
+
+    outputImage: MatLike = inputImage.copy()
+    aruco.drawDetectedMarkers(outputImage, markerCorners, markerIds)
+
+    cv.imshow("output", outputImage)
+    cv.waitKey(0)
 
 
 def detect_aruco_camera():
     # init aruco detector
-    detectorParams: cv.aruco.DetectorParameters = cv.aruco.DetectorParameters()
+    detector_params: cv.aruco.DetectorParameters = cv.aruco.DetectorParameters()
     dictionary: cv.aruco.Dictionary = cv.aruco.getPredefinedDictionary(
         cv.aruco.DICT_6X6_250
     )
-    detector = cv.aruco.ArucoDetector(dictionary, detectorParams)
+    detector = cv.aruco.ArucoDetector(dictionary, detector_params)
 
     # init camera capture
     camId = 0
