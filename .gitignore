@@ -8,6 +8,10 @@
 *.webp
 /samples-data
 
+# numpy saved files
+*.npy
+*.npz
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
