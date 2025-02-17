@@ -1,4 +1,4 @@
-# vision
+# mecapivision
 detection et analyse des éléments du terrain avec une camera
 
 ## Quick start
