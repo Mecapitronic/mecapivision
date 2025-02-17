@@ -16,4 +16,8 @@
     "python.analysis.autoFormatStrings": true,
     "python.analysis.typeCheckingMode": "basic",
     "ruff.lineLength": 88,
+    "sonarlint.connectedMode.project": {
+        "connectionId": "mecapitronic",
+        "projectKey": "Mecapitronic_vision"
+    },
 }
