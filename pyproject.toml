@@ -4,6 +4,16 @@ version = "0.1.0"
 description = "detect aruco with a camera"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = [
-    "opencv-python>=4.11.0.86",
-]
+dependencies = ["opencv-python>=4.11.0.86"]
+
+[flake8]
+max-line-length = 90
+
+[tool.pylint]
+max-line-length = 90
+
+[tool.pylint.typecheck]
+extension-pkg-allow-list = "cv2"
+
+[tool.ruff]
+line-length = 90
