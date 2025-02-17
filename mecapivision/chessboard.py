@@ -4,6 +4,8 @@ from cv2.typing import MatLike
 
 
 def detect_corners(filename: str) -> MatLike:
+    print(f"detecting corners in {filename}")
+
     img = cv.imread(filename)
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
