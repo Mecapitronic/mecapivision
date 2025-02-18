@@ -58,6 +58,7 @@ def estimate_pose_aruco(
     rvecs = []
     tvecs = []
 
+    # Set coordinate system; we are on a plane surface
     obj_points = np.array(
         [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]],
         dtype=np.float32,
@@ -67,8 +68,18 @@ def estimate_pose_aruco(
     total_iterations: float = 0.0
     tick = cv.getTickCount()
 
-    # detect markers and estimate pose
-    marker_corners, marker_ids, rejected_candidates = detect_aruco(image_path)
+    # detect markers
+    print(f"searching for aruco markers in image {image_path}")
+    input_image: MatLike = cv.imread(image_path, cv.IMREAD_COLOR)
+    detector_params: cv.aruco.DetectorParameters = cv.aruco.DetectorParameters()
+    dictionary: cv.aruco.Dictionary = cv.aruco.getPredefinedDictionary(
+        cv.aruco.DICT_6X6_250
+    )
+    detector = cv.aruco.ArucoDetector(dictionary, detector_params)
+    marker_corners, marker_ids, rejected_candidates = detector.detectMarkers(
+        input_image
+    )
+
     n_markers: int = len(marker_corners)
     n_ids: int = len(marker_ids)
 
@@ -80,8 +91,13 @@ def estimate_pose_aruco(
         for i in range(n_markers):
             print(f"calculating pose for marker {marker_ids[i]}")
             print(f"marker corners: {marker_corners[i][0]}")
+            print(f"obj points: {obj_points}")
+
             ret, rvec, tvec = cv.solvePnP(
-                obj_points, camera_matrix, dist_coeffs, marker_corners[i][0]
+                obj_points,
+                marker_corners[i],
+                camera_matrix,
+                dist_coeffs,
             )
             if not ret:
                 print(f"Pose estimation failed for marker {marker_ids[i]}")
