@@ -30,6 +30,7 @@
                 "GitHub.vscode-pull-request-github",
                 "ms-python.mypy-type-checker",
                 "ms-python.python",
+                "njpwerner.autodocstring",
                 "SonarSource.sonarlint-vscode",
                 "tamasfe.even-better-toml"
             ]
