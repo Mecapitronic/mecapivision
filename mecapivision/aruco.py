@@ -5,7 +5,7 @@ from typing import Sequence
 import cv2 as cv
 import numpy as np
 from cv2 import aruco
-from cv2.typing import MatLike, Scalar
+from cv2.typing import MatLike
 
 
 def get_aruco_tag(aruco_id: int, size_in_pixels: int = 200) -> MatLike:
@@ -64,7 +64,6 @@ def estimate_pose_aruco(
         dtype=np.float32,
     )
 
-    total_time: float = 0.0
     tick = cv.getTickCount()
 
     # detect markers
@@ -265,12 +264,7 @@ def detect_aruco_camera(
                     )
 
         if show_rejected and len(rejected_candidates):
-            cv.aruco.drawDetectedMarkers(
-                image_copy,
-                rejected_candidates,
-                no_array(),
-                Scalar(100, 0, 255),
-            )
+            cv.aruco.drawDetectedMarkers(image_copy, rejected_candidates, None)
 
         # Display the captured frame
         cv.imshow("Camera", image_copy)
