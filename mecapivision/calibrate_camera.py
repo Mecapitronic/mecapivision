@@ -5,8 +5,11 @@
 # we might need to calibrate in two steps:
 # 1. capture images of the chessboard
 # 2. calibrate the camera with the images
+#    2.1. record calibration parameters in a file
 # 3. undistort livestream
 
+
+from typing import Sequence
 
 import cv2 as cv
 import numpy as np
@@ -25,13 +28,12 @@ def camera_calibration() -> None:
     # if not Path("images/my_calib_15.jpg").exists():
     #     get_multiple_chessboard_pictures(camera)
 
-    objpoints, imgpoints = analyse_multiple_chessboard_pictures(camera)
-    ret, mtx, dist, rvecs, tvecs = calibrate_camera(
-        "images/left12.jpg", objpoints, imgpoints
-    )
-    print(f"Calibration result: {ret}")
+    objpoints, imgpoints, imgsize = analyse_multiple_chessboard_pictures(camera)
+    ret, mtx, dist, rvecs, tvecs = calibrate_camera(objpoints, imgpoints, imgsize)
 
-    undistort_livestream(camera)
+    print(f"Calibration result: {ret}")
+    print("starting undistorted livestream")
+    undistort_livestream(camera, mtx, dist)
 
     re_projection_error(objpoints, imgpoints, mtx, dist, rvecs, tvecs)
 
@@ -75,13 +77,21 @@ def get_multiple_chessboard_pictures(
 
 def analyse_multiple_chessboard_pictures(
     video: str,
-) -> tuple[list[np.ndarray], list[np.ndarray]]:
+) -> tuple[list[np.ndarray], list[np.ndarray], Sequence[int]]:
+    """Analyse multiple chessboard pictures to calibrate the camera
+
+    Args:
+        video (str): camera device file path in /dev
+
+    Returns:
+        tuple[list[np.ndarray], list[np.ndarray], Sequence[int]]: object points, image points, image size
+    """
     # termination criteria
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
     # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
-    objp = np.zeros((6 * 7, 3), np.float32)
-    objp[:, :2] = np.mgrid[0:7, 0:6].T.reshape(-1, 2)
+    objp = np.zeros((6 * 9, 3), np.float32)
+    objp[:, :2] = np.mgrid[0:9, 0:6].T.reshape(-1, 2)
 
     # Arrays to store object points and image points from all the images.
     objpoints = []  # 3d point in real world space
@@ -134,23 +144,30 @@ def analyse_multiple_chessboard_pictures(
         if cv.waitKey(20) & 0xFF == ord("q"):
             break
 
+    ret, image = camera.read()
+    gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+    image_size = gray.shape[::-1]
+
     camera.release()
     cv.destroyAllWindows()
-    return objpoints, imgpoints
+
+    print(imgpoints)
+    print(objpoints)
+    print(f"got {len(imgpoints)} image points and {len(objpoints)} object points")
+
+    return objpoints, imgpoints, image_size
 
 
 def calibrate_camera(
-    image_path: str,
     objpoints: list[np.ndarray],
     imgpoints: list[np.ndarray],
+    image_size: Sequence[int],
 ) -> tuple:
-    img = cv.imread(image_path)
     # Calibration
-    gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(
         objpoints,
         imgpoints,
-        gray.shape[::-1],
+        image_size,
         None,
         None,
     )
@@ -158,8 +175,10 @@ def calibrate_camera(
     return ret, mtx, dist, rvecs, tvecs
 
 
-def undistort_livestream(video: str) -> None:
-    camera = cv.VideoCapture(0)
+def undistort_livestream(video: str, mtx, dist) -> None:
+    camera = cv.VideoCapture(video)
+    camera.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
+    camera.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
 
     while True:
         ret, image = camera.read()
@@ -169,17 +188,23 @@ def undistort_livestream(video: str) -> None:
             break
 
         # Undistortion
-        h, w = img.shape[:2]
+        h, w = image.shape[:2]
         newcameramtx, roi = cv.getOptimalNewCameraMatrix(mtx, dist, (w, h), 1, (w, h))
 
         # method 1: undistort (the easiest way)
-        dst = cv.undistort(img, mtx, dist, None, newcameramtx)
+        dst = cv.undistort(image, mtx, dist, None, newcameramtx)
         # crop the image
         x, y, w, h = roi
         dst = dst[y : y + h, x : x + w]  # noqa: E203
 
         cv.imshow("original", image)
         cv.imshow("calibrated", dst)
+
+        if cv.waitKey(20) & 0xFF == ord("q"):
+            break
+
+    camera.release()
+    cv.destroyAllWindows()
 
 
 def undistort_image(img, mtx, dist):
