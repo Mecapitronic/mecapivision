@@ -65,7 +65,6 @@ def estimate_pose_aruco(
     )
 
     total_time: float = 0.0
-    total_iterations: float = 0.0
     tick = cv.getTickCount()
 
     # detect markers
@@ -106,13 +105,7 @@ def estimate_pose_aruco(
             tvecs.append(tvec)
 
         current_time = (cv.getTickCount() - tick) / cv.getTickFrequency()
-        total_time += current_time
-
-        if total_iterations % 30 == 0:
-            print(
-                f"Detection Time = {current_time * 1000} ms "
-                f"(Mean = {1000 * total_time / total_iterations} ms)"
-            )
+        print(f"Detection Time = {current_time * 1000} ms")
 
     # draw results
     input_image: MatLike = cv.imread(image_path, cv.IMREAD_COLOR)
@@ -134,12 +127,7 @@ def estimate_pose_aruco(
                 )
 
         if show_rejected and len(rejected_candidates):
-            cv.aruco.drawDetectedMarkers(
-                output_image,
-                rejected_candidates,
-                no_array(),
-                Scalar(100, 0, 255),
-            )
+            cv.aruco.drawDetectedMarkers(output_image, rejected_candidates, None)
 
         # Display the captured frame
         cv.imshow("Camera", output_image)
