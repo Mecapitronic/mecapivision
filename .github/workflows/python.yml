@@ -33,13 +33,17 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 pylint pytest uv
+        pip install flake8 mypy pylint pytest uv
         uv sync --frozen
 
     - name: Analysing the code with ruff
       uses: astral-sh/ruff-action@v3
       with:
         args: check --output-format=github .
+
+    - name: check typing with mypy
+      run: |
+        uv run mypy mecapivision
 
     # bug in pylint with cv2: E1101: Module 'cv2' has no '' member (no-member)
     # https://github.com/pylint-dev/pylint/issues/10027
