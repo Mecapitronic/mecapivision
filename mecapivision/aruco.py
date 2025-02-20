@@ -1,4 +1,3 @@
-from glob import glob
 from pathlib import Path
 from typing import Sequence
 
@@ -133,31 +132,13 @@ def estimate_pose_aruco(
         cv.waitKey(0)
 
 
-def list_cameras() -> list[str]:
-    available_cameras: list[str] = []
-    for cam in glob("/dev/video*"):
-        camera = cv.VideoCapture(cam)
-        if not camera.isOpened():
-            print(f"camera {cam} is not available")
-        else:
-            print(f"camera {cam} is available")
-            frame_width = int(camera.get(cv.CAP_PROP_FRAME_WIDTH))
-            frame_height = int(camera.get(cv.CAP_PROP_FRAME_HEIGHT))
-            print(f"camera frame width: {frame_width}")
-            print(f"camera frame height: {frame_height}")
-
-            available_cameras.append(cam)
-            camera.release()
-
-    return available_cameras
-
-    # def get_camera_parameters() -> tuple:
-    #     cv::Mat cameraMatrix, distCoeffs;
-    #     # You can read camera parameters from tutorial_camera_params.yml
-    #     readCameraParameters(filename, cameraMatrix, distCoeffs); // This function is located in detect_markers.cpp
-    #     std::vector<cv::Vec3d> rvecs, tvecs;
-    #     cv::aruco::estimatePoseSingleMarkers(markerCorners, 0.05, cameraMatrix, distCoeffs, rvecs, tvecs);
-    # return cameraMatrix, distCoeffs
+# def get_camera_parameters() -> tuple:
+#     cv::Mat cameraMatrix, distCoeffs;
+#     # You can read camera parameters from tutorial_camera_params.yml
+#     readCameraParameters(filename, cameraMatrix, distCoeffs); // This function is located in detect_markers.cpp
+#     std::vector<cv::Vec3d> rvecs, tvecs;
+#     cv::aruco::estimatePoseSingleMarkers(markerCorners, 0.05, cameraMatrix, distCoeffs, rvecs, tvecs);
+# return cameraMatrix, distCoeffs
 
 
 def read_parameters(filename: str = "images/tutorial_camera_params.yml") -> tuple:
@@ -275,10 +256,6 @@ def detect_aruco_camera(
 
 
 if __name__ == "__main__":
-    # list available cameras
-    available_cameras = list_cameras()
-    print(available_cameras)
-
     estimate_pose_aruco("images/aruco_tags_scene.jpg")
 
     # detect aruco tag in camera feed

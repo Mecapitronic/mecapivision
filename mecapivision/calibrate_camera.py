@@ -5,22 +5,27 @@ import glob
 
 import cv2 as cv
 import numpy as np
+from utils import list_cameras
 
 
-def camera_calibration():
+def camera_calibration(video: int) -> None:
     print("Calibrating camera...")
-    objpoints, imgpoints = analyse_pictures_for_calibration()
+    objpoints, imgpoints = analyse_multiple_chessboard_pictures(video)
+
     ret, mtx, dist, rvecs, tvecs = calibrate_camera(
         "images/left12.jpg", objpoints, imgpoints
     )
-    print(f"Ret: {ret}")
+    print(f"Calibration result: {ret}")
+
     for img in glob.glob("images/left*.jpg"):
         undistort_image(img, mtx, dist)
 
     re_projection_error(objpoints, imgpoints, mtx, dist, rvecs, tvecs)
 
 
-def analyse_pictures_for_calibration() -> tuple[list[np.ndarray], list[np.ndarray]]:
+def analyse_multiple_chessboard_pictures(
+    video: int,
+) -> tuple[list[np.ndarray], list[np.ndarray]]:
     # termination criteria
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
@@ -32,11 +37,18 @@ def analyse_pictures_for_calibration() -> tuple[list[np.ndarray], list[np.ndarra
     objpoints = []  # 3d point in real world space
     imgpoints = []  # 2d points in image plane.
 
-    images = glob.glob("images/left*.jpg")
+    print("opening camera to get chessboard pictures")
+    camera = cv.VideoCapture(video)
+    while True:
+        ret, image = camera.read()
 
-    for fname in images:
-        img = cv.imread(fname)
-        gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+        if not ret:
+            print("Can't receive frame (stream end)")
+            break
+
+        cv.imshow("captured picture", image)
+
+        gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
 
         # Find the chess board corners
         ret, corners = cv.findChessboardCorners(gray, (7, 6), None)
@@ -49,9 +61,8 @@ def analyse_pictures_for_calibration() -> tuple[list[np.ndarray], list[np.ndarra
             imgpoints.append(corners2)
 
             # Draw and display the corners
-            cv.drawChessboardCorners(img, (7, 6), corners2, ret)
-            cv.imshow("img", img)
-            cv.waitKey(500)
+            cv.drawChessboardCorners(image, (7, 6), corners2, ret)
+            cv.imshow("captured picture", image)
 
     cv.destroyAllWindows()
     return objpoints, imgpoints
@@ -75,6 +86,30 @@ def calibrate_camera(
     )
 
     return ret, mtx, dist, rvecs, tvecs
+
+
+def undistort_livestream(video: int) -> None:
+    camera = cv.VideoCapture(0)
+
+    while True:
+        ret, image = camera.read()
+
+        if not ret:
+            print("Can't receive frame (stream end)")
+            break
+
+        # Undistortion
+        h, w = img.shape[:2]
+        newcameramtx, roi = cv.getOptimalNewCameraMatrix(mtx, dist, (w, h), 1, (w, h))
+
+        # method 1: undistort (the easiest way)
+        dst = cv.undistort(img, mtx, dist, None, newcameramtx)
+        # crop the image
+        x, y, w, h = roi
+        dst = dst[y : y + h, x : x + w]  # noqa: E203
+
+        cv.imshow("original", image)
+        cv.imshow("calibrated", dst)
 
 
 def undistort_image(img, mtx, dist):
@@ -111,3 +146,25 @@ def re_projection_error(
         error = cv.norm(imgpoints[i], imgpoints2, cv.NORM_L2) / len(imgpoints2)
         mean_error += error
     print("total error: {}".format(mean_error / len(objpoints)))
+
+
+def main():
+    available_cameras = list_cameras()
+    print(available_cameras)
+
+    camera = cv.VideoCapture(available_cameras[-1])
+    while True:
+        ret, image = camera.read()
+        cv.imshow("camera", image)
+        if cv.waitKey(1) & 0xFF == ord("q"):
+            break
+    camera.release()
+    cv.destroyAllWindows()
+
+    camera = int(0)
+    camera_calibration(camera)
+    undistort_livestream(camera)
+
+
+if __name__ == "__main__":
+    main()
