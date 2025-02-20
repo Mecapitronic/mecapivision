@@ -1,14 +1,18 @@
 # source https://docs.opencv.org/4.11.0/dc/dbb/tutorial_py_calibration.html
 # TODO inspi https://www.kaggle.com/code/danielwe14/stereocamera-calibration-with-opencv
 
-import glob
+
+# we might need to calibrate in two steps:
+# 1. capture images of the chessboard
+# 2. calibrate the camera with the images
+# 3. undistort livestream
 
 import cv2 as cv
 import numpy as np
 from utils import list_cameras
 
 
-def camera_calibration(video: int) -> None:
+def camera_calibration(video: str) -> None:
     print("Calibrating camera...")
     objpoints, imgpoints = analyse_multiple_chessboard_pictures(video)
 
@@ -17,14 +21,13 @@ def camera_calibration(video: int) -> None:
     )
     print(f"Calibration result: {ret}")
 
-    for img in glob.glob("images/left*.jpg"):
-        undistort_image(img, mtx, dist)
+    undistort_livestream(video)
 
     re_projection_error(objpoints, imgpoints, mtx, dist, rvecs, tvecs)
 
 
 def analyse_multiple_chessboard_pictures(
-    video: int,
+    video: str,
 ) -> tuple[list[np.ndarray], list[np.ndarray]]:
     # termination criteria
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.001)
@@ -39,7 +42,12 @@ def analyse_multiple_chessboard_pictures(
 
     print("opening camera to get chessboard pictures")
     camera = cv.VideoCapture(video)
-    while True:
+    camera.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
+    camera.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
+
+    nb_pictures_needed = 15
+    nb_pictures_taken = 0
+    while camera.isOpened():
         ret, image = camera.read()
 
         if not ret:
@@ -49,21 +57,31 @@ def analyse_multiple_chessboard_pictures(
         cv.imshow("captured picture", image)
 
         gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
-
         # Find the chess board corners
-        ret, corners = cv.findChessboardCorners(gray, (7, 6), None)
+        flags = (
+            cv.CALIB_CB_ADAPTIVE_THRESH
+            + cv.CALIB_CB_FAST_CHECK
+            + cv.CALIB_CB_NORMALIZE_IMAGE
+        )
+        ret, corners = cv.findChessboardCorners(gray, (9, 6), flags=flags)
 
         # If found, add object points, image points (after refining them)
         if ret:
-            objpoints.append(objp)
+            print("Chessboard found")
 
+            objpoints.append(objp)
             corners2 = cv.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
             imgpoints.append(corners2)
 
             # Draw and display the corners
-            cv.drawChessboardCorners(image, (7, 6), corners2, ret)
-            cv.imshow("captured picture", image)
+            cv.drawChessboardCorners(image, (8, 7), corners2, ret)
+            cv.imshow("drawn", image)
+            nb_pictures_taken += 1
 
+        if cv.waitKey(20) & 0xFF == ord("q"):
+            break
+
+    camera.release()
     cv.destroyAllWindows()
     return objpoints, imgpoints
 
@@ -88,7 +106,7 @@ def calibrate_camera(
     return ret, mtx, dist, rvecs, tvecs
 
 
-def undistort_livestream(video: int) -> None:
+def undistort_livestream(video: str) -> None:
     camera = cv.VideoCapture(0)
 
     while True:
@@ -152,18 +170,12 @@ def main():
     available_cameras = list_cameras()
     print(available_cameras)
 
-    camera = cv.VideoCapture(available_cameras[-1])
-    while True:
-        ret, image = camera.read()
-        cv.imshow("camera", image)
-        if cv.waitKey(1) & 0xFF == ord("q"):
-            break
-    camera.release()
-    cv.destroyAllWindows()
-
-    camera = int(0)
+    camera = available_cameras[-1]
     camera_calibration(camera)
     undistort_livestream(camera)
+
+    # camera.release()
+    cv.destroyAllWindows()
 
 
 if __name__ == "__main__":
