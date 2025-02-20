@@ -7,23 +7,70 @@
 # 2. calibrate the camera with the images
 # 3. undistort livestream
 
+
 import cv2 as cv
 import numpy as np
 from utils import list_cameras
 
+PICTURES_PATH = "images/"
 
-def camera_calibration(video: str) -> None:
+
+def camera_calibration() -> None:
     print("Calibrating camera...")
-    objpoints, imgpoints = analyse_multiple_chessboard_pictures(video)
 
+    available_cameras = list_cameras()
+    print(available_cameras)
+    camera = available_cameras[-1]
+
+    # if not Path("images/my_calib_15.jpg").exists():
+    #     get_multiple_chessboard_pictures(camera)
+
+    objpoints, imgpoints = analyse_multiple_chessboard_pictures(camera)
     ret, mtx, dist, rvecs, tvecs = calibrate_camera(
         "images/left12.jpg", objpoints, imgpoints
     )
     print(f"Calibration result: {ret}")
 
-    undistort_livestream(video)
+    undistort_livestream(camera)
 
     re_projection_error(objpoints, imgpoints, mtx, dist, rvecs, tvecs)
+
+
+def get_multiple_chessboard_pictures(
+    video: str,
+    pictures_path: str = "images/",
+    pictures_basename: str = "my_calib_",
+) -> None:
+    camera = cv.VideoCapture(video)
+    camera.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
+    camera.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
+
+    nb_pictures_needed = 15
+    nb_pictures_taken = 0
+    while camera.isOpened():
+        ret, image = camera.read()
+
+        if not ret:
+            print("Can't receive frame (stream end)")
+            break
+
+        cv.imshow("captured picture", image)
+
+        if cv.waitKey(20) & 0xFF == ord("r"):
+            cv.imwrite(
+                f"{pictures_path}{pictures_basename}{nb_pictures_taken}.jpg", image
+            )
+            nb_pictures_taken += 1
+            print(f"Picture {nb_pictures_taken} taken")
+
+        if cv.waitKey(20) & 0xFF == ord("q"):
+            break
+
+        if nb_pictures_taken == nb_pictures_needed:
+            break
+
+    camera.release()
+    cv.destroyAllWindows()
 
 
 def analyse_multiple_chessboard_pictures(
@@ -45,7 +92,9 @@ def analyse_multiple_chessboard_pictures(
     camera.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
     camera.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
 
-    nb_pictures_needed = 15
+    print(
+        "Press 'r' to take a picture when the chessboard is detected. Press 'q' to quit."
+    )
     nb_pictures_taken = 0
     while camera.isOpened():
         ret, image = camera.read()
@@ -69,14 +118,18 @@ def analyse_multiple_chessboard_pictures(
         if ret:
             print("Chessboard found")
 
-            objpoints.append(objp)
             corners2 = cv.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
-            imgpoints.append(corners2)
 
             # Draw and display the corners
             cv.drawChessboardCorners(image, (8, 7), corners2, ret)
-            cv.imshow("drawn", image)
-            nb_pictures_taken += 1
+            cv.imshow("detection", image)
+
+            if cv.waitKey(20) & 0xFF == ord("r"):
+                objpoints.append(objp)
+                imgpoints.append(corners2)
+
+                nb_pictures_taken += 1
+                print(f"Picture {nb_pictures_taken} taken")
 
         if cv.waitKey(20) & 0xFF == ord("q"):
             break
@@ -92,7 +145,6 @@ def calibrate_camera(
     imgpoints: list[np.ndarray],
 ) -> tuple:
     img = cv.imread(image_path)
-
     # Calibration
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(
@@ -166,17 +218,5 @@ def re_projection_error(
     print("total error: {}".format(mean_error / len(objpoints)))
 
 
-def main():
-    available_cameras = list_cameras()
-    print(available_cameras)
-
-    camera = available_cameras[-1]
-    camera_calibration(camera)
-    undistort_livestream(camera)
-
-    # camera.release()
-    cv.destroyAllWindows()
-
-
 if __name__ == "__main__":
-    main()
+    camera_calibration()
