@@ -26,4 +26,9 @@
         "connectionId": "mecapitronic",
         "projectKey": "Mecapitronic_vision"
     },
+    "mypy-type-checker.path": [
+        "uv",
+        "run",
+        "mypy"
+    ]
 }
