@@ -6,7 +6,7 @@ from cv2.typing import MatLike
 
 from mecapivision.calibration.fake_chessboard import (
     analyse_pictures_for_calibration,
-    calibrate_camera,
+    calibrate_fake_camera,
 )
 
 
@@ -32,7 +32,7 @@ def detect_corners(filename: str) -> MatLike:
 def calib_cam():
     print("Calibrating camera...")
     objpoints, imgpoints = analyse_pictures_for_calibration()
-    ret, mtx, dist, rvecs, tvecs = calibrate_camera(
+    ret, mtx, dist, rvecs, tvecs = calibrate_fake_camera(
         "images/left14.jpg", objpoints, imgpoints
     )
     print(f"Ret: {ret}")

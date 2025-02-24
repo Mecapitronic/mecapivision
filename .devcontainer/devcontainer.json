@@ -19,6 +19,7 @@
         "--env",
         "DISPLAY"
     ],
+    "postCreateCommand": "uv venv && uv sync",
     "customizations": {
         "vscode": {
             "extensions": [

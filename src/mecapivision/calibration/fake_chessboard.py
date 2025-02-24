@@ -10,18 +10,31 @@ import glob
 import cv2 as cv
 import numpy as np
 
+from ._utils import print_reprojection_error
 
-def camera_calibration_from_image(image: str) -> None:
+DEFAULT_IMAGE = "images/left12.jpg"
+
+
+def calibrate_fake_camera(image_path: str = DEFAULT_IMAGE) -> None:
     print("Calibrating camera...")
     objpoints, imgpoints = analyse_pictures_for_calibration()
-    ret, mtx, dist, rvecs, tvecs = calibrate_camera(
-        "images/left12.jpg", objpoints, imgpoints
+
+    # Calibration
+    img = cv.imread(image_path)
+    gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+    ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(
+        objpoints,
+        imgpoints,
+        gray.shape[::-1],
+        None,
+        None,
     )
     print(f"Ret: {ret}")
+
     for img in glob.glob("images/left*.jpg"):
         undistort_image(img, mtx, dist)
 
-    re_projection_error(objpoints, imgpoints, mtx, dist, rvecs, tvecs)
+    print_reprojection_error(objpoints, imgpoints, mtx, dist, rvecs, tvecs)
 
 
 def analyse_pictures_for_calibration() -> tuple[list[np.ndarray], list[np.ndarray]]:
@@ -59,26 +72,6 @@ def analyse_pictures_for_calibration() -> tuple[list[np.ndarray], list[np.ndarra
 
     cv.destroyAllWindows()
     return objpoints, imgpoints
-
-
-def calibrate_camera(
-    image_path: str,
-    objpoints: list[np.ndarray],
-    imgpoints: list[np.ndarray],
-) -> tuple:
-    img = cv.imread(image_path)
-
-    # Calibration
-    gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-    ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(
-        objpoints,
-        imgpoints,
-        gray.shape[::-1],
-        None,
-        None,
-    )
-
-    return ret, mtx, dist, rvecs, tvecs
 
 
 def undistort_image(img, mtx, dist):
