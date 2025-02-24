@@ -1,3 +1,7 @@
+# exercise to calibrate a camera using opencv, based on a tutorial
+# uses a set of images of a chessboard to calibrate the camera
+# and then undistort the images
+
 # source https://docs.opencv.org/4.11.0/dc/dbb/tutorial_py_calibration.html
 # TODO inspi https://www.kaggle.com/code/danielwe14/stereocamera-calibration-with-opencv
 

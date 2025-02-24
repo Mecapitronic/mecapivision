@@ -1,5 +1,12 @@
-# source https://docs.opencv.org/4.11.0/dc/dbb/tutorial_py_calibration.html
-# TODO inspi https://www.kaggle.com/code/danielwe14/stereocamera-calibration-with-opencv
+"""
+Calibrate the camera to undistort the image
+
+Source:
+    https://docs.opencv.org/4.11.0/dc/dbb/tutorial_py_calibration.html
+
+TODO:
+    https://www.kaggle.com/code/danielwe14/stereocamera-calibration-with-opencv
+"""
 
 
 # we might need to calibrate in two steps:
@@ -8,7 +15,6 @@
 #    2.1. record calibration parameters in a file
 # 3. undistort livestream
 
-
 from typing import Sequence
 
 import cv2 as cv
@@ -16,6 +22,7 @@ import numpy as np
 from utils import list_cameras
 
 PICTURES_PATH = "images/"
+CANT_RECEIVE_FRAME = "Can't receive frame (stream end)"
 
 
 def camera_calibration() -> None:
@@ -53,7 +60,7 @@ def get_multiple_chessboard_pictures(
         ret, image = camera.read()
 
         if not ret:
-            print("Can't receive frame (stream end)")
+            print(CANT_RECEIVE_FRAME)
             break
 
         cv.imshow("captured picture", image)
@@ -110,7 +117,7 @@ def analyse_multiple_chessboard_pictures(
         ret, image = camera.read()
 
         if not ret:
-            print("Can't receive frame (stream end)")
+            print(CANT_RECEIVE_FRAME)
             break
 
         cv.imshow("captured picture", image)
@@ -184,7 +191,7 @@ def undistort_livestream(video: str, mtx, dist) -> None:
         ret, image = camera.read()
 
         if not ret:
-            print("Can't receive frame (stream end)")
+            print(CANT_RECEIVE_FRAME)
             break
 
         # Undistortion
