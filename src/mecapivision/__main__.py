@@ -1,7 +1,8 @@
+from random import randint
+
 import cv2 as cv
 from cv2.typing import MatLike
 
-from .calibration.utils import list_cameras
 from .detection.aruco import (
     detect_aruco,
     detect_aruco_camera,
@@ -16,19 +17,16 @@ def display_image(image_name: str, image: MatLike):
     cv.destroyAllWindows()
 
 
-def plop():
+def main():
     print("Hello from mecapivision!")
 
     chess = detect_corners("images/chessboard.jpg")
-    display_image("chess", chess)
+    display_image("chessboard corners", chess)
 
-    display_image("aruco", get_aruco_tag(31))
-
+    tag_id = randint(0, 100)
+    display_image(f"aruco tag {tag_id}", get_aruco_tag(tag_id))
     detect_aruco("images/aruco_tags_scene.jpg")
 
-
-def main():
-    list_cameras()
     detect_aruco_camera()
 
 
