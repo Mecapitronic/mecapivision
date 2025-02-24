@@ -4,7 +4,7 @@ import cv2 as cv
 import numpy as np
 from cv2.typing import MatLike
 
-from mecapivision.calibration.fake_calibrate_camera import (
+from mecapivision.calibration.fake_chessboard import (
     analyse_pictures_for_calibration,
     calibrate_camera,
 )

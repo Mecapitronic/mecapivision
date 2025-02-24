@@ -13,7 +13,8 @@ test = ["pytest>=8.3.4"]
 dev = [{ include-group = "lint" }, { include-group = "test" }]
 
 [project.scripts]
-plop = "mecapivision:main"
+vision = "mecapivision:main"
+chesscalib = "mecapivision:calibrate_camera_with_chessboard"
 
 [tool.uv]
 package = true

@@ -1,5 +1,5 @@
 """
-Calibrate the camera to undistort the image
+Calibrate the camera with a chessboard to undistort the image
 
 Source:
     https://docs.opencv.org/4.11.0/dc/dbb/tutorial_py_calibration.html
@@ -20,30 +20,37 @@ from typing import Sequence
 import cv2 as cv
 import numpy as np
 
-from ._utils import list_cameras
+from ._utils import get_last_camera, print_reprojection_error, save_camera_calibration
 
 PICTURES_PATH = "images/"
 CANT_RECEIVE_FRAME = "Can't receive frame (stream end)"
 
 
-def camera_calibration() -> None:
+def calibrate_camera_with_chessboard():
+    camera = get_last_camera()
+    calibrate_camera(camera)
+
+
+def calibrate_camera(camera: str) -> None:
     print("Calibrating camera...")
 
-    available_cameras = list_cameras()
-    print(available_cameras)
-    camera = available_cameras[-1]
-
-    # if not Path("images/my_calib_15.jpg").exists():
-    #     get_multiple_chessboard_pictures(camera)
-
     objpoints, imgpoints, imgsize = analyse_multiple_chessboard_pictures(camera)
-    ret, mtx, dist, rvecs, tvecs = calibrate_camera(objpoints, imgpoints, imgsize)
+
+    # Calibration
+    ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(
+        objpoints,
+        imgpoints,
+        imgsize,
+        None,
+        None,
+    )
 
     print(f"Calibration result: {ret}")
+    save_camera_calibration("camera_calibration.npz", mtx, dist)
+    print_reprojection_error(objpoints, imgpoints, mtx, dist, rvecs, tvecs)
+
     print("starting undistorted livestream")
     undistort_livestream(camera, mtx, dist)
-
-    re_projection_error(objpoints, imgpoints, mtx, dist, rvecs, tvecs)
 
 
 def get_multiple_chessboard_pictures(
@@ -166,23 +173,6 @@ def analyse_multiple_chessboard_pictures(
     return objpoints, imgpoints, image_size
 
 
-def calibrate_camera(
-    objpoints: list[np.ndarray],
-    imgpoints: list[np.ndarray],
-    image_size: Sequence[int],
-) -> tuple:
-    # Calibration
-    ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(
-        objpoints,
-        imgpoints,
-        image_size,
-        None,
-        None,
-    )
-
-    return ret, mtx, dist, rvecs, tvecs
-
-
 def undistort_livestream(video: str, mtx, dist) -> None:
     camera = cv.VideoCapture(video)
     camera.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
@@ -213,43 +203,3 @@ def undistort_livestream(video: str, mtx, dist) -> None:
 
     camera.release()
     cv.destroyAllWindows()
-
-
-def undistort_image(img, mtx, dist):
-    img = cv.imread(img)
-
-    # Undistortion
-    h, w = img.shape[:2]
-    newcameramtx, roi = cv.getOptimalNewCameraMatrix(mtx, dist, (w, h), 1, (w, h))
-
-    # method 1: undistort (the easiest way)
-    dst = cv.undistort(img, mtx, dist, None, newcameramtx)
-
-    # method 2: remapping (more difficult)
-    # # undistort
-    # mapx, mapy = cv.initUndistortRectifyMap(mtx, dist, None, newcameramtx, (w,h), 5)
-    # dst = cv.remap(img, mapx, mapy, cv.INTER_LINEAR)
-
-    # crop the image
-    x, y, w, h = roi
-    dst = dst[y : y + h, x : x + w]  # noqa: E203
-
-    cv.imshow("original", img)
-    cv.imshow("calibrated", dst)
-    cv.waitKey(0)
-
-
-def re_projection_error(
-    objpoints: list[np.ndarray], imgpoints: list[np.ndarray], mtx, dist, rvecs, tvecs
-):
-    # Re-projection Error
-    mean_error = 0.0
-    for i in range(len(objpoints)):
-        imgpoints2, _ = cv.projectPoints(objpoints[i], rvecs[i], tvecs[i], mtx, dist)
-        error = cv.norm(imgpoints[i], imgpoints2, cv.NORM_L2) / len(imgpoints2)
-        mean_error += error
-    print("total error: {}".format(mean_error / len(objpoints)))
-
-
-if __name__ == "__main__":
-    camera_calibration()
