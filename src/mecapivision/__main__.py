@@ -1,8 +1,13 @@
 import cv2 as cv
-from aruco import detect_aruco, detect_aruco_camera, get_aruco_tag
-from chessboard import detect_corners
 from cv2.typing import MatLike
-from utils import list_cameras
+
+from .calibration.utils import list_cameras
+from .detection.aruco import (
+    detect_aruco,
+    detect_aruco_camera,
+    get_aruco_tag,
+)
+from .detection.chessboard import detect_corners
 
 
 def display_image(image_name: str, image: MatLike):

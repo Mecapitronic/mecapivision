@@ -19,7 +19,8 @@ from typing import Sequence
 
 import cv2 as cv
 import numpy as np
-from utils import list_cameras
+
+from .utils import list_cameras
 
 PICTURES_PATH = "images/"
 CANT_RECEIVE_FRAME = "Can't receive frame (stream end)"

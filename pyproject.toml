@@ -3,21 +3,29 @@ name = "mecapivision"
 version = "0.1.0"
 description = "detect aruco tags with a camera"
 readme = "README.md"
-requires-python = ">=3.12"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
 dependencies = ["opencv-python>=4.11.0.86"]
+
+[dependency-groups]
+lint = ["mypy>=1.15.0", "ruff>=0.9.6"]
+test = ["pytest>=8.3.4"]
+dev = [{ include-group = "lint" }, { include-group = "test" }]
+
+[project.scripts]
+plop = "mecapivision:main"
+
+[tool.uv]
+package = true
 
 [tool.pylint]
 max-line-length = 90
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
 
 [tool.pylint.typecheck]
 extension-pkg-allow-list = "cv2"
 
 [tool.ruff]
 line-length = 90
-
-[dependency-groups]
-dev = [
-    "mypy>=1.15.0",
-    "pytest>=8.3.4",
-    "ruff>=0.9.6",
-]

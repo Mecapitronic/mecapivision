@@ -1,6 +1,12 @@
 from glob import glob
 
-from cv2 import CAP_PROP_FRAME_HEIGHT, CAP_PROP_FRAME_WIDTH, VideoCapture
+from cv2 import (
+    CAP_PROP_FRAME_HEIGHT,
+    CAP_PROP_FRAME_WIDTH,
+    FILE_STORAGE_WRITE,
+    FileStorage,
+    VideoCapture,
+)
 
 
 def list_cameras() -> list[str]:
@@ -20,3 +26,20 @@ def list_cameras() -> list[str]:
             camera.release()
 
     return available_cameras
+
+
+def save_calibration(file: str, mtx, dist, rvecs, tvecs):
+    """Save camera calibration parameters to file using opencv
+
+    Args:
+        calibration (tuple):
+        file (str): _description_
+    """
+
+    fs = FileStorage(str(file), FILE_STORAGE_WRITE)
+    fs.write("cameraMatrix", mtx)
+    fs.write("distCoeffs", dist)
+    fs.write("rvecs", rvecs)
+    fs.write("tvecs", tvecs)
+    fs.release()
+    print(f"Calibration saved to {file}")
