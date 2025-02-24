@@ -4,7 +4,7 @@ import cv2 as cv
 
 from mecapivision.detection.chessboard import detect_corners
 
-images_folder = "src/mecapivision/images/"
+images_folder = "images/"
 
 
 class TestChessboard:
