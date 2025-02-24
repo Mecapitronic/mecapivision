@@ -30,35 +30,32 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+
     - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install flake8 mypy pylint pytest uv
-        uv sync --frozen
+      run: uv sync --all-extras --dev
+
+    - name: Run tests
+      # For example, using `pytest`
+      run: uv run pytest tests
 
     - name: Analysing the code with ruff
-      uses: astral-sh/ruff-action@v3
-      with:
-        args: check --output-format=github .
+      run: uv run ruff check --output-format=github src
 
     - name: check typing with mypy
-      run: |
-        uv run mypy mecapivision
+      run: uv run mypy src
 
     # bug in pylint with cv2: E1101: Module 'cv2' has no '' member (no-member)
     # https://github.com/pylint-dev/pylint/issues/10027
-    # - name: Analyse the  with pylint
-    #   run: |
-    #     uv run pylint $(git ls-files '*.py')
-
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        uv run flake8 mecapivision --count --select=E9,F63,F7,F82 --show-source --statistics --max-line-length 90 --max-doc-length 100
+        uv run flake8 src --count --select=E9,F63,F7,F82 --show-source --statistics --max-line-length 90 --max-doc-length 100
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        uv run flake8 mecapivision --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --max-line-length 90 --max-doc-length 100
+        uv run flake8 src --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --max-line-length 90 --max-doc-length 100
 
     - name: Test with pytest
       run: |
-        uv run --with pytest pytest tests
+        uv run pytest
 
