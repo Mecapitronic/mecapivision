@@ -8,9 +8,9 @@ requires-python = ">=3.10"
 dependencies = ["opencv-python>=4.11.0.86"]
 
 [dependency-groups]
-lint = ["mypy>=1.15.0", "ruff>=0.9.6"]
-test = ["pytest>=8.3.4"]
 dev = [{ include-group = "lint" }, { include-group = "test" }]
+lint = ["flake8>=7.1.2", "mypy>=1.15.0", "ruff>=0.9.6"]
+test = ["pytest>=8.3.4"]
 
 [project.scripts]
 vision = "mecapivision:main"
