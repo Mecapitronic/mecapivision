@@ -38,18 +38,12 @@ def calibrate_fake_camera() -> None:
     images_base_name: str = "left"
     images = glob(f"{images_folder}{images_base_name}*.jpg")
 
-    objpoints, imgpoints = analyse_chessboard_pictures(images)
-    mtx, dist = calibrate_from_pictures(images[0], objpoints, imgpoints)
+    objpoints, imgpoints, imgsize = analyse_chessboard_pictures(images)
+    mtx, dist = calibrate_from_pictures(objpoints, imgpoints, imgsize)
 
     # display undistorted images
     for image_path in images:
         undistort_image(image_path, mtx, dist)
-
-
-def calibrate_camera_from_livestream() -> None:
-    print("Calibrating camera with livestream")
-    camera = get_last_camera()
-    calibrate_camera_live(camera)
 
 
 def calibrate_camera_from_pictures() -> None:
@@ -59,12 +53,18 @@ def calibrate_camera_from_pictures() -> None:
     print("Calibrating camera from pictures")
     images = glob(f"{PICTURES_FOLDER}{DEFAULT_NAME}*.jpg")
 
-    analyse_chessboard_pictures(images)
+    objpoints, imgpoints, imgsize = analyse_chessboard_pictures(images)
+    mtx, dist = calibrate_from_pictures(objpoints, imgpoints, imgsize)
 
-    objpoints, imgpoints = analyse_chessboard_pictures(images)
-    mtx, dist = calibrate_from_pictures(images[0], objpoints, imgpoints)
+    save_camera_calibration("camera_calibration_pictures.npz", mtx, dist)
 
-    save_camera_calibration("camera_calibration.npz", mtx, dist)
+
+def calibrate_camera_from_livestream() -> None:
+    print("Calibrating camera with livestream")
+    camera = get_last_camera()
+    calibrate_camera_live(camera)
+
+    save_camera_calibration("camera_calibration_live.npz", mtx, dist)
 
 
 # LIVE CALIBRATION
@@ -73,7 +73,7 @@ def calibrate_camera_from_pictures() -> None:
 def calibrate_camera_live(camera: str) -> None:
     print("Calibrating camera...")
 
-    objpoints, imgpoints, imgsize = analyse_chessboards_live(camera, save_pictures=True)
+    objpoints, imgpoints, imgsize = analyse_chessboards_live(camera)
 
     # Calibration
     ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(
@@ -85,7 +85,6 @@ def calibrate_camera_live(camera: str) -> None:
     )  # type: ignore
 
     print(f"Calibration result: {ret}")
-    save_camera_calibration("camera_calibration.npz", mtx, dist)
     print_reprojection_error(objpoints, imgpoints, mtx, dist, rvecs, tvecs)
 
     print("starting undistorted livestream")
@@ -94,8 +93,6 @@ def calibrate_camera_live(camera: str) -> None:
 
 def analyse_chessboards_live(
     video: str,
-    *,
-    save_pictures: bool = False,
 ) -> tuple[list[np.ndarray], list[np.ndarray], Sequence[int]]:
     """Analyse multiple chessboard pictures to calibrate the camera
 
@@ -159,8 +156,7 @@ def analyse_chessboards_live(
 
                 nb_pictures_taken += 1
                 print(f"Picture {nb_pictures_taken} taken")
-                if save_pictures:
-                    cv.imwrite(f"my_calib/chessboard_{nb_pictures_taken}.jpg", image)
+
         else:
             print("Chessboard not found")
             cv.imshow("detection", image)
@@ -186,26 +182,27 @@ def analyse_chessboards_live(
 
 
 def calibrate_from_pictures(
-    image_path: str, objpoints, imgpoints
+    objpoints: list[np.ndarray],
+    imgpoints: list[np.ndarray],
+    image_size: Sequence[int],
 ) -> tuple[np.ndarray, np.ndarray]:
     """Calibrate the camera with a set of pictures of a chessboard
 
     Args:
-        image_path (str): path to the image to calibrate the camera
+        objpoints (list[np.ndarray]): object points
+        imgpoints (list[np.ndarray]): image points
+        image_size (Sequence[int]): size of the images
 
     Returns:
         tuple[np.ndarray, np.ndarray]: camera matrix and distortion coefficients
     """
-    print("Calibrating camera from pictures")
+    print("Calibrating camera with data points")
 
-    # Calibration
-    img = cv.imread(image_path)
-    gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-
+    print("nb points", len(objpoints), len(imgpoints))
     ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(
         objpoints,
         imgpoints,
-        gray.shape[::-1],
+        image_size,
         None,
         None,
     )  # type: ignore
@@ -219,7 +216,8 @@ def calibrate_from_pictures(
 def analyse_chessboard_pictures(
     images_paths_list: list[str],
     display: bool = False,
-) -> tuple[list[np.ndarray], list[np.ndarray]]:
+) -> tuple[list[np.ndarray], list[np.ndarray], Sequence[int]]:
+    print("Analysing chessboard pictures")
     # termination criteria
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
@@ -230,13 +228,21 @@ def analyse_chessboard_pictures(
     # Arrays to store object points and image points from all the images.
     objpoints = []  # 3d point in real world space
     imgpoints = []  # 2d points in image plane.
+    image_size = []
 
     for fname in images_paths_list:
+        # spaces clear the line from previous print
+        print(f"Analysing {fname}", end="\r", flush=True)
+
         img = cv.imread(fname)
         gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+        # usefull only once
+        image_size = gray.shape[::-1]
 
         # Find the chess board corners
         ret, corners = cv.findChessboardCorners(gray, (7, 6), None)
+
+        print(ret, corners)
 
         # If found, add object points, image points (after refining them)
         if ret:
@@ -251,5 +257,11 @@ def analyse_chessboard_pictures(
                 cv.imshow("img", img)
                 cv.waitKey(500)
 
+    print(
+        "\nPoints found (image, IRL):",
+        len(imgpoints),
+        len(objpoints),
+        flush=True,
+    )
     cv.destroyAllWindows()
-    return objpoints, imgpoints
+    return objpoints, imgpoints, image_size

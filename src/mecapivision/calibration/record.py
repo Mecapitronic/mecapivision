@@ -2,10 +2,7 @@ from pathlib import Path
 
 import cv2 as cv
 
-from ._utils import CANT_RECEIVE_FRAME, get_last_camera
-
-PICTURES_FOLDER = "my_calib/"
-DEFAULT_NAME = "chessboard"
+from ._utils import CANT_RECEIVE_FRAME, DEFAULT_NAME, PICTURES_FOLDER, get_last_camera
 
 
 def record_pictures_cli() -> None:
@@ -38,10 +35,10 @@ def record_pictures(
 
         if cv.waitKey(10) & 0xFF == ord("r"):
             cv.imwrite(
-                f"{pictures_folder}{pictures_basename}_{nb_pictures_taken}.jpg", image
+                f"{pictures_folder}{pictures_basename}{nb_pictures_taken}.jpg", image
             )
             nb_pictures_taken += 1
-            print(f"Picture {nb_pictures_taken} taken")
+            print(f"Picture taken: {nb_pictures_taken}   \r", end=" ")
 
         if cv.waitKey(10) & 0xFF == ord("q"):
             break
@@ -53,4 +50,4 @@ def record_pictures(
     cv.destroyAllWindows()
 
     print(f"{nb_pictures_taken} pictures taken")
-    print(f"pictures saved in {pictures_folder} as {pictures_basename}_*.jpg")
+    print(f"pictures saved in {pictures_folder} as {pictures_basename}*.jpg")

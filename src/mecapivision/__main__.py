@@ -32,3 +32,10 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# Plan
+# calibrer la camera avec des charuco
+# enregistrer la calibration
+# detecter les aruco du terrain pour définire les dimensions
+# detecter les aruco des robots pour les suivre
+# projeter la position du robot sur le plan du terrain pour obtenir la position absolue

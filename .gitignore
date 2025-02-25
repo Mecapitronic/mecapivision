@@ -7,6 +7,7 @@
 *.svg
 *.webp
 /samples-data
+/my_calib
 
 # numpy saved files
 *.npy

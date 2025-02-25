@@ -5,6 +5,9 @@ from numpy import load, ndarray, savetxt, savez
 
 CANT_RECEIVE_FRAME = "Can't receive frame (stream end)"
 
+PICTURES_FOLDER = "my_calib/"
+DEFAULT_NAME = "chessboard_"
+
 
 def list_cameras() -> list[str]:
     available_cameras: list[str] = []
@@ -128,6 +131,9 @@ def record_camera_stream():
     while True:
         ret, frame = cam.read()
 
+        if not ret:
+            print(CANT_RECEIVE_FRAME)
+            break
         # Write the frame to the output file
         out.write(frame)
 

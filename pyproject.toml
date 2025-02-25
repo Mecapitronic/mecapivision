@@ -14,9 +14,9 @@ test = ["pytest>=8.3.4"]
 
 [project.scripts]
 caliblive = "mecapivision:calibrate_camera_from_livestream"
-calibpic = "mecapivision:calibrate_camera_from_pictures"
+calibpics = "mecapivision:calibrate_camera_from_pictures"
 calibfake = "mecapivision:calibrate_fake_camera"
-recordpics = "mecapivision:record_pictures_cli"
+record = "mecapivision:record_pictures_cli"
 vision = "mecapivision:main"
 
 [tool.uv]
