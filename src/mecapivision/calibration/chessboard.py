@@ -20,9 +20,12 @@ from typing import Sequence
 import cv2 as cv
 import numpy as np
 
-from ._utils import get_last_camera, print_reprojection_error, save_camera_calibration
+from ._utils import (
+    get_last_camera,
+    print_reprojection_error,
+    save_camera_calibration,
+)
 
-PICTURES_PATH = "images/"
 CANT_RECEIVE_FRAME = "Can't receive frame (stream end)"
 
 
@@ -34,7 +37,9 @@ def calibrate_camera_with_chessboard():
 def calibrate_camera(camera: str) -> None:
     print("Calibrating camera...")
 
-    objpoints, imgpoints, imgsize = analyse_multiple_chessboard_pictures(camera)
+    objpoints, imgpoints, imgsize = analyse_multiple_chessboards_live(
+        camera, save_pictures=True
+    )
 
     # Calibration
     ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(
@@ -53,45 +58,10 @@ def calibrate_camera(camera: str) -> None:
     undistort_livestream(camera, mtx, dist)
 
 
-def get_multiple_chessboard_pictures(
+def analyse_multiple_chessboards_live(
     video: str,
-    pictures_path: str = "images/",
-    pictures_basename: str = "my_calib_",
-) -> None:
-    camera = cv.VideoCapture(video)
-    camera.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
-    camera.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
-
-    nb_pictures_needed = 15
-    nb_pictures_taken = 0
-    while camera.isOpened():
-        ret, image = camera.read()
-
-        if not ret:
-            print(CANT_RECEIVE_FRAME)
-            break
-
-        cv.imshow("captured picture", image)
-
-        if cv.waitKey(20) & 0xFF == ord("r"):
-            cv.imwrite(
-                f"{pictures_path}{pictures_basename}{nb_pictures_taken}.jpg", image
-            )
-            nb_pictures_taken += 1
-            print(f"Picture {nb_pictures_taken} taken")
-
-        if cv.waitKey(20) & 0xFF == ord("q"):
-            break
-
-        if nb_pictures_taken == nb_pictures_needed:
-            break
-
-    camera.release()
-    cv.destroyAllWindows()
-
-
-def analyse_multiple_chessboard_pictures(
-    video: str,
+    *,
+    save_pictures: bool = False,
 ) -> tuple[list[np.ndarray], list[np.ndarray], Sequence[int]]:
     """Analyse multiple chessboard pictures to calibrate the camera
 
@@ -155,6 +125,11 @@ def analyse_multiple_chessboard_pictures(
 
                 nb_pictures_taken += 1
                 print(f"Picture {nb_pictures_taken} taken")
+                if save_pictures:
+                    cv.imwrite(f"my_calib/chessboard_{nb_pictures_taken}.jpg", image)
+        else:
+            print("Chessboard not found")
+            cv.imshow("detection", image)
 
         if cv.waitKey(20) & 0xFF == ord("q"):
             break

@@ -1,26 +1,19 @@
 from glob import glob
 
-from cv2 import (
-    CAP_PROP_FRAME_HEIGHT,
-    CAP_PROP_FRAME_WIDTH,
-    NORM_L2,
-    VideoCapture,
-    norm,
-    projectPoints,
-)
+import cv2 as cv
 from numpy import load, ndarray, savetxt, savez
 
 
 def list_cameras() -> list[str]:
     available_cameras: list[str] = []
     for cam in glob("/dev/video*"):
-        camera = VideoCapture(cam)
+        camera = cv.VideoCapture(cam)
         if not camera.isOpened():
             print(f"camera {cam} is not available")
         else:
             print(f"camera {cam} is available")
-            frame_width = int(camera.get(CAP_PROP_FRAME_WIDTH))
-            frame_height = int(camera.get(CAP_PROP_FRAME_HEIGHT))
+            frame_width = int(camera.get(cv.CAP_PROP_FRAME_WIDTH))
+            frame_height = int(camera.get(cv.CAP_PROP_FRAME_HEIGHT))
             print(f"camera frame width: {frame_width}")
             print(f"camera frame height: {frame_height}")
 
@@ -113,8 +106,8 @@ def print_reprojection_error(
     """
     mean_error = 0.0
     for i in range(len(objpoints)):
-        imgpoints2, _ = projectPoints(objpoints[i], rvecs[i], tvecs[i], mtx, dist)
-        error = norm(imgpoints[i], imgpoints2, NORM_L2) / len(imgpoints2)
+        imgpoints2, _ = cv.projectPoints(objpoints[i], rvecs[i], tvecs[i], mtx, dist)
+        error = cv.norm(imgpoints[i], imgpoints2, cv.NORM_L2) / len(imgpoints2)
         mean_error += error
 
     print("total error (closer to 0 is better): {}".format(mean_error / len(objpoints)))

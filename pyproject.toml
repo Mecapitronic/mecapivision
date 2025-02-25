@@ -15,6 +15,7 @@ test = ["pytest>=8.3.4"]
 [project.scripts]
 vision = "mecapivision:main"
 chesscalib = "mecapivision:calibrate_camera_with_chessboard"
+recordpics = "mecapivision:record_pictures_cli"
 
 [tool.uv]
 package = true
