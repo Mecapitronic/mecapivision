@@ -60,8 +60,6 @@ def save_camera_calibration(file: str, mtx: ndarray, dist: ndarray) -> None:
         rvecs (np.ndarray): rotation vectors
         tvecs (np.ndarray): translation
     """
-
-    # 66e98d0aa1da
     savez("Camcalib.npz", mtx=mtx, dist=dist)
     savetxt("cameraMatrix.txt", (mtx, dist))
     print(f"Calibration saved to {file}")
@@ -111,3 +109,34 @@ def print_reprojection_error(
         mean_error += error
 
     print("total error (closer to 0 is better): {}".format(mean_error / len(objpoints)))
+
+
+def record_camera_stream():
+    # Open the default camera
+    cam = cv.VideoCapture(0)
+
+    # Get the default frame width and height
+    frame_width = int(cam.get(cv.CAP_PROP_FRAME_WIDTH))
+    frame_height = int(cam.get(cv.CAP_PROP_FRAME_HEIGHT))
+
+    # Define the codec and create VideoWriter object
+    fourcc = cv.VideoWriter_fourcc(*"mp4v")
+    out = cv.VideoWriter("output.mp4", fourcc, 20.0, (frame_width, frame_height))
+
+    while True:
+        ret, frame = cam.read()
+
+        # Write the frame to the output file
+        out.write(frame)
+
+        # Display the captured frame
+        cv.imshow("Camera", frame)
+
+        # Press 'q' to exit the loop
+        if cv.waitKey(1) == ord("q"):
+            break
+
+    # Release the capture and writer objects
+    cam.release()
+    out.release()
+    cv.destroyAllWindows()

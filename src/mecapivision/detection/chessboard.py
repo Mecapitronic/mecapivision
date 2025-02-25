@@ -4,11 +4,6 @@ import cv2 as cv
 import numpy as np
 from cv2.typing import MatLike
 
-from mecapivision.calibration.fake_chessboard import (
-    analyse_pictures_for_calibration,
-    calibrate_fake_camera,
-)
-
 
 def detect_corners(filename: str) -> MatLike:
     print(f"detecting corners in {filename}")
@@ -29,14 +24,6 @@ def detect_corners(filename: str) -> MatLike:
 
 
 # POSE estimation
-def calib_cam():
-    print("Calibrating camera...")
-    objpoints, imgpoints = analyse_pictures_for_calibration()
-    ret, mtx, dist, rvecs, tvecs = calibrate_fake_camera(
-        "images/left14.jpg", objpoints, imgpoints
-    )
-    print(f"Ret: {ret}")
-    np.savez("B.npz", mtx=mtx, dist=dist, rvecs=rvecs, tvecs=tvecs)
 
 
 def draw(img, corners, imgpts):
@@ -86,6 +73,5 @@ def pose_estimation():
 
 
 if __name__ == "__main__":
-    calib_cam()
     pose_estimation()
     cv.destroyAllWindows()
