@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Sequence
+from typing import Any, Sequence
 
 import cv2 as cv
 import numpy as np
@@ -106,7 +106,7 @@ def estimate_pose_aruco(
         print(f"Detection Time = {current_time * 1000} ms")
 
     # draw results
-    input_image: MatLike = cv.imread(image_path, cv.IMREAD_COLOR)
+    input_image = cv.imread(image_path, cv.IMREAD_COLOR)
     output_image = input_image.copy()
 
     if n_ids > 0:
@@ -167,8 +167,8 @@ def detect_aruco_camera(
     camera = cv.VideoCapture(camera_id)
 
     camera_matrix, dist_coeffs = read_parameters()
-    rvecs: list[any] = []
-    tvecs: list[any] = []
+    rvecs: list[Any] = []
+    tvecs: list[Any] = []
 
     # set coordinate system
     # obj_points = cv.Mat((4, 1))  # cv.CV_32FC3
@@ -205,13 +205,11 @@ def detect_aruco_camera(
         if estimate_pose and n_markers > 0:
             # Calculate pose for each marker
             for i in range(n_markers):
-                ret, one, two = cv.solvePnP(
+                ret, rvecs[i], tvecs[i] = cv.solvePnP(
                     obj_points,
                     camera_matrix,
                     dist_coeffs,
                     marker_corners[i],
-                    rvecs[i],
-                    tvecs[i],
                 )
                 if not ret:
                     print(f"Pose estimation failed for marker {marker_ids[i]}")

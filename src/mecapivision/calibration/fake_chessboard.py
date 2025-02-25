@@ -22,17 +22,18 @@ def calibrate_fake_camera(image_path: str = DEFAULT_IMAGE) -> None:
     # Calibration
     img = cv.imread(image_path)
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+
     ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(
         objpoints,
         imgpoints,
         gray.shape[::-1],
         None,
         None,
-    )
+    )  # type: ignore
     print(f"Ret: {ret}")
 
-    for img in glob.glob("images/left*.jpg"):
-        undistort_image(img, mtx, dist)
+    for image_path in glob.glob("images/left*.jpg"):
+        undistort_image(image_path, mtx, dist)
 
     print_reprojection_error(objpoints, imgpoints, mtx, dist, rvecs, tvecs)
 
@@ -74,8 +75,8 @@ def analyse_pictures_for_calibration() -> tuple[list[np.ndarray], list[np.ndarra
     return objpoints, imgpoints
 
 
-def undistort_image(img, mtx, dist):
-    img = cv.imread(img)
+def undistort_image(image_path: str, mtx: np.ndarray, dist: np.ndarray) -> None:
+    img = cv.imread(image_path)
 
     # Undistortion
     h, w = img.shape[:2]

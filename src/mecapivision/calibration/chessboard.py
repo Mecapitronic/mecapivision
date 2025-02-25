@@ -43,7 +43,7 @@ def calibrate_camera(camera: str) -> None:
         imgsize,
         None,
         None,
-    )
+    )  # type: ignore
 
     print(f"Calibration result: {ret}")
     save_camera_calibration("camera_calibration.npz", mtx, dist)

@@ -14,13 +14,13 @@ def detect_corners(filename: str) -> MatLike:
     print(f"detecting corners in {filename}")
 
     img = cv.imread(filename)
-    gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+    img_gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
-    gray = np.float32(gray)
-    dst = cv.cornerHarris(gray, 2, 3, 0.04)
+    gray = np.float32(img_gray)
+    dst = cv.cornerHarris(gray, 2, 3, 0.04)  # type: ignore
 
     # result is dilated for marking the corners, not important
-    dst = cv.dilate(dst, None)
+    dst = cv.dilate(dst, None)  # type: ignore
 
     # Threshold for an optimal value, it may vary depending on the image.
     img[dst > 0.01 * dst.max()] = [0, 0, 255]
