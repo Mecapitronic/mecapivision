@@ -16,29 +16,13 @@ import cv2 as cv
 import numpy as np
 
 from ._utils import (
+    CANT_RECEIVE_FRAME,
     get_last_camera,
     print_reprojection_error,
     save_camera_calibration,
 )
+from .record import DEFAULT_NAME, PICTURES_FOLDER
 from .undistort import undistort_image, undistort_livestream
-
-CANT_RECEIVE_FRAME = "Can't receive frame (stream end)"
-
-
-def calibrate_camera_with_chessboard(live: bool = False) -> None:
-    """Calibrate the camera with a chessboard. Can operate on livestream or with recorded images
-    set live to True to calibrate with a livestream. Otherwise, the camera will take pictures of the chessboard
-
-    Args:
-        live (bool, optional): whether to calibrate with a livestream or recorded images.
-        True is livestream, False is recorded images. Defaults to False.
-    """
-    if live:
-        camera = get_last_camera()
-        calibrate_camera(camera)
-
-    else:
-        print("Calibrating camera with recorded images")
 
 
 def calibrate_fake_camera() -> None:
@@ -62,10 +46,31 @@ def calibrate_fake_camera() -> None:
         undistort_image(image_path, mtx, dist)
 
 
+def calibrate_camera_from_livestream() -> None:
+    print("Calibrating camera with livestream")
+    camera = get_last_camera()
+    calibrate_camera_live(camera)
+
+
+def calibrate_camera_from_pictures() -> None:
+    """Calibrate the camera with a set of pictures of a chessboard.
+    Pictures are recorded with the record_pictures function in record.py
+    """
+    print("Calibrating camera from pictures")
+    images = glob(f"{PICTURES_FOLDER}{DEFAULT_NAME}*.jpg")
+
+    analyse_chessboard_pictures(images)
+
+    objpoints, imgpoints = analyse_chessboard_pictures(images)
+    mtx, dist = calibrate_from_pictures(images[0], objpoints, imgpoints)
+
+    save_camera_calibration("camera_calibration.npz", mtx, dist)
+
+
 # LIVE CALIBRATION
 
 
-def calibrate_camera(camera: str) -> None:
+def calibrate_camera_live(camera: str) -> None:
     print("Calibrating camera...")
 
     objpoints, imgpoints, imgsize = analyse_chessboards_live(camera, save_pictures=True)

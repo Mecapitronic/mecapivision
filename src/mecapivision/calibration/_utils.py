@@ -3,6 +3,8 @@ from glob import glob
 import cv2 as cv
 from numpy import load, ndarray, savetxt, savez
 
+CANT_RECEIVE_FRAME = "Can't receive frame (stream end)"
+
 
 def list_cameras() -> list[str]:
     available_cameras: list[str] = []

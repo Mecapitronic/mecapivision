@@ -2,9 +2,8 @@ from pathlib import Path
 
 import cv2 as cv
 
-from ._utils import get_last_camera
+from ._utils import CANT_RECEIVE_FRAME, get_last_camera
 
-CANT_RECEIVE_FRAME = "Can't receive frame (stream end)"
 PICTURES_FOLDER = "my_calib/"
 DEFAULT_NAME = "chessboard"
 
