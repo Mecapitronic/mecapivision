@@ -5,7 +5,10 @@ description = "detect aruco tags with a camera"
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.10"
-dependencies = ["opencv-python>=4.11.0.86"]
+dependencies = [
+    "loguru>=0.7.3",
+    "opencv-python>=4.11.0.86",
+]
 
 [dependency-groups]
 dev = [{ include-group = "lint" }, { include-group = "test" }]

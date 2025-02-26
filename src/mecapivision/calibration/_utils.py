@@ -1,7 +1,7 @@
 from glob import glob
 
 import cv2 as cv
-from numpy import load, ndarray, savetxt, savez
+from numpy import load, ndarray, savez
 
 CANT_RECEIVE_FRAME = "Can't receive frame (stream end)"
 
@@ -46,7 +46,7 @@ def print_calibration_result(mtx, dist) -> None:
     print("Distortion Coefficients:\n", dist)
 
 
-def save_camera_calibration(file: str, mtx: ndarray, dist: ndarray) -> None:
+def save_camera_calibration(file: str = "my_calib.npz", mtx: ndarray, dist: ndarray) -> None:
     """Save camera calibration parameters to file using numpy
 
     Intrinsic parameters are the internal characteristics of your camera — think of them as the camera's personality traits.
@@ -65,8 +65,7 @@ def save_camera_calibration(file: str, mtx: ndarray, dist: ndarray) -> None:
         rvecs (np.ndarray): rotation vectors
         tvecs (np.ndarray): translation
     """
-    savez("Camcalib.npz", mtx=mtx, dist=dist)
-    savetxt("cameraMatrix.txt", (mtx, dist))
+    savez(file, mtx=mtx, dist=dist)
     print(f"Calibration saved to {file}")
 
 
