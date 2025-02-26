@@ -61,7 +61,7 @@ def calibrate_camera_from_pictures() -> None:
     objpoints, imgpoints, imgsize = analyse_chessboard_pictures(images)
     mtx, dist = calibrate_from_pictures(objpoints, imgpoints, imgsize)
 
-    save_camera_calibration("camera_calibration_pictures.npz", mtx, dist)
+    save_camera_calibration(mtx, dist, "camera_calibration_pictures.npz")
 
 
 def calibrate_camera_from_livestream() -> None:
@@ -69,7 +69,7 @@ def calibrate_camera_from_livestream() -> None:
     camera = get_last_camera()
     mtx, dist = calibrate_camera_live(camera)
 
-    save_camera_calibration("camera_calibration_live.npz", mtx, dist)
+    save_camera_calibration(mtx, dist, "camera_calibration_live.npz")
 
 
 # LIVE CALIBRATION
@@ -213,7 +213,7 @@ def calibrate_from_pictures(
     """
     logger.info("Calibrating camera with data points")
 
-    logger.info("nb points", len(objpoints), len(imgpoints))
+    logger.info(f"nb points {len(objpoints)} {len(imgpoints)}")
     ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(
         objpoints,
         imgpoints,

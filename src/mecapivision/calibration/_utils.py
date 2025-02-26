@@ -46,7 +46,11 @@ def print_calibration_result(mtx, dist) -> None:
     print("Distortion Coefficients:\n", dist)
 
 
-def save_camera_calibration(file: str = "my_calib.npz", mtx: ndarray, dist: ndarray) -> None:
+def save_camera_calibration(
+    mtx: ndarray,
+    dist: ndarray,
+    file: str = "my_calib.npz",
+) -> None:
     """Save camera calibration parameters to file using numpy
 
     Intrinsic parameters are the internal characteristics of your camera — think of them as the camera's personality traits.
