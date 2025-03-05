@@ -13,6 +13,7 @@ import sys
 from glob import glob
 from typing import Sequence
 
+import click
 import cv2 as cv
 import numpy as np
 from loguru import logger
@@ -51,9 +52,18 @@ def calibrate_fake_camera() -> None:
         undistort_image(image_path, mtx, dist)
 
 
-def calibrate_camera_from_pictures() -> None:
+@click.command()
+@click.option(
+    "--calibration_file_path",
+    "-c",
+    help="Path to the file where the calibration will be saved",
+)
+def calibrate_camera_from_pictures(calibration_file_path: str) -> None:
     """Calibrate the camera with a set of pictures of a chessboard.
     Pictures are recorded with the record_pictures function in record.py
+
+    Args:
+        calibration_file_path (str): path to the file where the calibration will be saved
     """
     logger.info("Calibrating camera from pictures")
     images = glob(f"{PICTURES_FOLDER}{DEFAULT_NAME}*.jpg")
@@ -61,7 +71,7 @@ def calibrate_camera_from_pictures() -> None:
     objpoints, imgpoints, imgsize = analyse_chessboard_pictures(images)
     mtx, dist = calibrate_from_pictures(objpoints, imgpoints, imgsize)
 
-    save_camera_calibration(mtx, dist, "camera_calibration_pictures.npz")
+    save_camera_calibration(mtx, dist, calibration_file_path)
 
 
 def calibrate_camera_from_livestream() -> None:

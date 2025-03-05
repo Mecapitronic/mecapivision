@@ -9,7 +9,6 @@ from loguru import logger
 
 from .._utils import (
     CANT_RECEIVE_FRAME,
-    PICTURES_FOLDER,
     get_last_camera,
     load_camera_calibration,
 )
@@ -19,7 +18,7 @@ from .._utils import (
 @click.command()
 @click.option(
     "--calibration_file",
-    default=PICTURES_FOLDER + "my_calib.npz",
+    "-c",
     help="File where the camera calibration is stored",
 )
 def cli(calibration_file: str) -> None:
@@ -47,15 +46,16 @@ def detect_aruco_live(
             break
 
         marker_corners, marker_ids, rejected_candidates = detect_aruco(image, detector)
-        estimate_pose_aruco(
-            image,
-            camera_matrix,
-            dist_coeffs,
-            marker_corners,
-            marker_ids,
-            rejected_candidates,
-        )
-        cv.imshow("Live Cam", image)
+        if marker_corners:
+            estimate_pose_aruco(
+                image,
+                camera_matrix,
+                dist_coeffs,
+                marker_corners,
+                marker_ids,
+                rejected_candidates,
+            )
+            cv.imshow("Live Cam", image)
 
         if cv.waitKey(5) & 0xFF == ord("q"):
             logger.info("Quitting")
