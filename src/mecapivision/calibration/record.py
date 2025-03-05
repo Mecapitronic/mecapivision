@@ -1,21 +1,41 @@
 from pathlib import Path
-
+from loguru import logger
 import cv2 as cv
+import click
 
-from ._utils import CANT_RECEIVE_FRAME, DEFAULT_NAME, PICTURES_FOLDER, get_last_camera
+from .._utils import CANT_RECEIVE_FRAME, DEFAULT_NAME, PICTURES_FOLDER, get_last_camera
 
+@click.command()
+@click.option(
+    "--pictures_folder",
+    "-f",
+    default=PICTURES_FOLDER,
+    help="Folder to save the pictures",
+)
+@click.option(
+    "--pictures_basename",
+    "-n",
+    default=DEFAULT_NAME,
+    help="Base name for the pictures",
+)
+@click.option(
+    "--nb_pictures_needed",
+    "-p",
+    default=10,
+    help="Number of pictures needed",
+)
 
-def record_pictures_cli() -> None:
-    record_pictures(get_last_camera())
+def record_pictures_cli(nb_pictures_needed: int, pictures_folder: str,pictures_basename: str ) -> None:
+    record_pictures(get_last_camera(), pictures_folder, pictures_basename, nb_pictures_needed)
 
 
 def record_pictures(
     video: str,
-    pictures_folder: str = PICTURES_FOLDER,
-    pictures_basename: str = DEFAULT_NAME,
+    pictures_folder: str,
+    pictures_basename: str,
     nb_pictures_needed: int = 10,
 ) -> None:
-    print("Recording pictures. Press 'r' to take a picture, 'q' to quit")
+    logger.info("Recording pictures. Press 'r' to take a picture, 'q' to quit")
 
     camera = cv.VideoCapture(video)
     camera.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
@@ -28,7 +48,7 @@ def record_pictures(
         ret, image = camera.read()
 
         if not ret:
-            print(CANT_RECEIVE_FRAME)
+            logger.error(CANT_RECEIVE_FRAME)
             break
 
         cv.imshow("captured picture", image)
@@ -49,5 +69,5 @@ def record_pictures(
     camera.release()
     cv.destroyAllWindows()
 
-    print(f"{nb_pictures_taken} pictures taken")
-    print(f"pictures saved in {pictures_folder} as {pictures_basename}*.jpg")
+    logger.info(f"{nb_pictures_taken} pictures taken")
+    logger.info(f"pictures saved in {pictures_folder}/{pictures_basename}0.jpg")
