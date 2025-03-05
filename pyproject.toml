@@ -5,10 +5,7 @@ description = "detect aruco tags with a camera"
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.10"
-dependencies = [
-    "loguru>=0.7.3",
-    "opencv-python>=4.11.0.86",
-]
+dependencies = ["click>=8.1.8", "loguru>=0.7.3", "opencv-python>=4.11.0.86"]
 
 [dependency-groups]
 dev = [{ include-group = "lint" }, { include-group = "test" }]
@@ -16,11 +13,12 @@ lint = ["flake8>=7.1.2", "mypy>=1.15.0", "ruff>=0.9.6"]
 test = ["pytest>=8.3.4"]
 
 [project.scripts]
-caliblive = "mecapivision:calibrate_camera_from_livestream"
-calibpics = "mecapivision:calibrate_camera_from_pictures"
 calibfake = "mecapivision:calibrate_fake_camera"
-record = "mecapivision:record_pictures_cli"
+caliblive = "mecapivision:calibrate_camera_from_livestream"
 vision = "mecapivision:main"
+record = "mecapivision:record_pictures_cli"
+calibrate = "mecapivision:calibrate_camera_from_pictures"
+detect = "mecapivision:cli"
 
 [tool.uv]
 package = true
