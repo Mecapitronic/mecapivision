@@ -5,6 +5,7 @@ from .calibration import (
     calibrate_fake_camera,
     record_pictures_cli,
 )
+from .detection import cli
 
 __all__ = [
     "main",

@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import Any, Sequence
 
 import cv2 as cv
@@ -139,16 +138,6 @@ def estimate_pose_aruco(
 #     std::vector<cv::Vec3d> rvecs, tvecs;
 #     cv::aruco::estimatePoseSingleMarkers(markerCorners, 0.05, cameraMatrix, distCoeffs, rvecs, tvecs);
 # return cameraMatrix, distCoeffs
-
-
-def read_parameters(filename: str = "images/tutorial_camera_params.yml") -> tuple:
-    # Read camera parameters from tutorial_camera_params.yml
-    assert Path(filename).exists(), f"file {filename} does not exist"
-    fs = cv.FileStorage(filename, cv.FILE_STORAGE_READ)
-    camera_matrix = fs.getNode("cameraMatrix").mat()
-    dist_coeffs = fs.getNode("distCoeffs").mat()
-    fs.release()
-    return camera_matrix, dist_coeffs
 
 
 def detect_aruco_camera(
