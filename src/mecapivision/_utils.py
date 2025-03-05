@@ -4,7 +4,7 @@ from loguru import logger
 
 import cv2 as cv
 from numpy import load, ndarray, savez
-
+from ._settings import camera_calibration_file
 CANT_RECEIVE_FRAME = "Can't receive frame (stream end)"
 
 PICTURES_FOLDER = "my_calib/"
@@ -52,7 +52,7 @@ def print_calibration_result(mtx, dist) -> None:
 def save_camera_calibration(
     mtx: ndarray,
     dist: ndarray,
-    file: str = "my_calib.npz",
+    file: str = camera_calibration_file,
 ) -> None:
     """Save camera calibration parameters to file using numpy
 
@@ -86,7 +86,7 @@ def load_camera_calibration(file: str) -> tuple[ndarray, ndarray]:
         tuple[ndarray, ndarray]: camera matrix and distortion coefficients
     """
     # Later, load the calibration results
-    with load("calibration_data.npz") as data:
+    with load(file) as data:
         mtx = data["mtx"]
         dist = data["dist"]
 
