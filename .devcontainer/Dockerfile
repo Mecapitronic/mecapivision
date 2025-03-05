@@ -1,9 +1,5 @@
 FROM mcr.microsoft.com/devcontainers/python:3.12-bookworm
 
-ARG USERNAME=vscode
-ARG USER_UID=1000
-ARG USER_GID=$USER_UID
-
 # libgl and x11 for opencv GUI
 # nodejs is required for SonarQube
 RUN apt update \
