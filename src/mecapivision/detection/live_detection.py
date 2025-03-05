@@ -55,7 +55,8 @@ def detect_aruco_live(
                 marker_ids,
                 rejected_candidates,
             )
-            cv.imshow("Live Cam", image)
+
+        cv.imshow("Live Cam", image)
 
         if cv.waitKey(5) & 0xFF == ord("q"):
             logger.info("Quitting")
