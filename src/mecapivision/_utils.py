@@ -1,4 +1,6 @@
 from glob import glob
+from pathlib import Path
+from loguru import logger
 
 import cv2 as cv
 from numpy import load, ndarray, savez
@@ -14,13 +16,13 @@ def list_cameras() -> list[str]:
     for cam in glob("/dev/video*"):
         camera = cv.VideoCapture(cam)
         if not camera.isOpened():
-            print(f"camera {cam} is not available")
+            logger.debug(f"camera {cam} is not available")
         else:
-            print(f"camera {cam} is available")
+            logger.debug(f"camera {cam} is available")
             frame_width = int(camera.get(cv.CAP_PROP_FRAME_WIDTH))
             frame_height = int(camera.get(cv.CAP_PROP_FRAME_HEIGHT))
-            print(f"camera frame width: {frame_width}")
-            print(f"camera frame height: {frame_height}")
+            logger.debug(f"camera frame width: {frame_width}")
+            logger.debug(f"camera frame height: {frame_height}")
 
             available_cameras.append(cam)
             camera.release()
@@ -36,14 +38,15 @@ def get_last_camera() -> str:
         str: camera device file path in /dev
     """
     available_cameras = list_cameras()
-    print(available_cameras)
+    available_cameras.sort()
+    logger.debug(available_cameras)
     return available_cameras[-1]
 
 
 def print_calibration_result(mtx, dist) -> None:
     # Print the calibration results
-    print("Camera Matrix:\n", mtx)
-    print("Distortion Coefficients:\n", dist)
+    logger.info("Camera Matrix:\n", mtx)
+    logger.info("Distortion Coefficients:\n", dist)
 
 
 def save_camera_calibration(
@@ -70,7 +73,7 @@ def save_camera_calibration(
         tvecs (np.ndarray): translation
     """
     savez(file, mtx=mtx, dist=dist)
-    print(f"Calibration saved to {file}")
+    logger.info(f"Calibration saved to {file}")
 
 
 def load_camera_calibration(file: str) -> tuple[ndarray, ndarray]:
@@ -88,6 +91,16 @@ def load_camera_calibration(file: str) -> tuple[ndarray, ndarray]:
         dist = data["dist"]
 
     return mtx, dist
+
+
+def read_parameters(filename: str = "images/tutorial_camera_params.yml") -> tuple:
+    # Read camera parameters from tutorial_camera_params.yml
+    assert Path(filename).exists(), f"file {filename} does not exist"
+    fs = cv.FileStorage(filename, cv.FILE_STORAGE_READ)
+    camera_matrix = fs.getNode("cameraMatrix").mat()
+    dist_coeffs = fs.getNode("distCoeffs").mat()
+    fs.release()
+    return camera_matrix, dist_coeffs
 
 
 def print_reprojection_error(
@@ -116,7 +129,7 @@ def print_reprojection_error(
         error = cv.norm(imgpoints[i], imgpoints2, cv.NORM_L2) / len(imgpoints2)
         mean_error += error
 
-    print("total error (closer to 0 is better): {}".format(mean_error / len(objpoints)))
+    logger.info("total error (closer to 0 is better): {}".format(mean_error / len(objpoints)))
 
 
 def record_camera_stream():
@@ -135,7 +148,7 @@ def record_camera_stream():
         ret, frame = cam.read()
 
         if not ret:
-            print(CANT_RECEIVE_FRAME)
+            logger.error(CANT_RECEIVE_FRAME)
             break
         # Write the frame to the output file
         out.write(frame)
