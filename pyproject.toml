@@ -5,7 +5,14 @@ description = "detect aruco tags with a camera"
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.10"
-dependencies = ["click>=8.1.8", "loguru>=0.7.3", "opencv-python>=4.11.0.86"]
+# on ne peut pas utiliser p5 parce que pyopengl qui ne build pas correctement
+# https://github.com/mcfletch/pyopengl/issues/118#issuecomment-2351365603
+dependencies = [
+    "click>=8.1.8",
+    "loguru>=0.7.3",
+    "opencv-python>=4.11.0.86",
+    "py5>=0.10.4a2",
+]
 
 [dependency-groups]
 dev = [{ include-group = "lint" }, { include-group = "test" }]
