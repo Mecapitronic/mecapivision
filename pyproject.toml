@@ -26,7 +26,7 @@ vision = "mecapivision:main"
 record = "mecapivision:record_pictures_cli"
 calibrate = "mecapivision:calibrate_camera_from_pictures"
 detect = "mecapivision:cli"
-processing = "mecapivision:processing:main"
+processing = "mecapivision:processing"
 
 [tool.uv]
 package = true

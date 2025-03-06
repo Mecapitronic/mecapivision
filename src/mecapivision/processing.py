@@ -1,14 +1,17 @@
-import py5
+from py5 import Sketch
 
 
-def setup():
-    py5.size(600, 800)
-    py5.rect_mode(py5.CENTER)
+class TestSketch(Sketch):
+    def settings(self):
+        self.size(300, 200)
+
+    def setup(self):
+        self.rect_mode(self.CENTER)
+
+    def draw(self):
+        self.rect(self.mouse_x, self.mouse_y, 10, 10)
 
 
-def draw():
-    py5.rect(py5.mouse_x, py5.mouse_y, 10, 10)
-
-
-def main():
-    py5.run_sketch()
+def processing():
+    test = TestSketch()
+    test.run_sketch()
