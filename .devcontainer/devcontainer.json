@@ -15,7 +15,6 @@
         "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
         "source=/dev/,target=/dev/,type=bind,consistency=consistent"
     ],
-    // "postAttachCommand": "sudo service udev restart",
     "runArgs": [
         "--privileged",
         "--env",
