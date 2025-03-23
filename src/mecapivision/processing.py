@@ -1,6 +1,3 @@
-import cv2
-import numpy as np
-from loguru import logger
 from py5 import Sketch
 
 # Define the size of the plane in meters
@@ -11,27 +8,7 @@ PLANE_HEIGHT = 3.0
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 600
 
-
-# Function to detect ArUco tags and return their positions
-def detect_aruco_positions(image):
-    # Load the dictionary that was used to generate the markers.
-    aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
-
-    detector_params: cv2.aruco.DetectorParameters = cv2.aruco.DetectorParameters()
-    detector = cv2.aruco.ArucoDetector(aruco_dict, detector_params)
-
-    # Detect the markers in the image
-    corners, ids, _ = detector.detectMarkers(image)
-
-    positions = []
-    if ids is not None:
-        for corner in corners:
-            # Calculate the center of the marker
-            center = np.mean(corner[0], axis=0)
-            positions.append(center)
-
-    logger.debug(positions)
-    return positions
+from .detection import aruco
 
 
 class ArucoSketch(Sketch):
@@ -65,11 +42,8 @@ class ArucoSketch(Sketch):
 
 def processing():
     image_path = "images/aruco_tags_scene.jpg"
-
-    # Load the image
-    image = cv2.imread(image_path)
-    # Detect ArUco positions
-    aruco_positions = detect_aruco_positions(image)
+    aruco_corners, _, _ = aruco.detect_aruco(image_path)
+    aruco_positions = aruco.get_arucos_positions(aruco_corners)
     # Create and run the sketch
     sketch = ArucoSketch(aruco_positions)
     sketch.run_sketch()

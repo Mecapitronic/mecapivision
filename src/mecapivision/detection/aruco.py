@@ -4,10 +4,11 @@ import cv2 as cv
 import numpy as np
 from cv2 import aruco
 from cv2.typing import MatLike
+from loguru import logger
 
 
 def get_aruco_tag(aruco_id: int, size_in_pixels: int = 200) -> MatLike:
-    print(f"generating aruco tag for id {aruco_id}")
+    logger.info(f"generating aruco tag for id {aruco_id}")
     all_aruco_wards: aruco.Dictionary = aruco.getPredefinedDictionary(aruco.DICT_4X4_50)
     marker_image: MatLike = aruco.generateImageMarker(
         all_aruco_wards, aruco_id, size_in_pixels
@@ -15,8 +16,8 @@ def get_aruco_tag(aruco_id: int, size_in_pixels: int = 200) -> MatLike:
     return marker_image
 
 
-def detect_aruco(image_path: str) -> tuple:
-    print(f"searching for aruco markers in image {image_path}")
+def detect_aruco(image_path: str, show_img: bool = False) -> tuple:
+    logger.info(f"searching for aruco markers in image {image_path}")
     input_image: MatLike = cv.imread(image_path, cv.IMREAD_COLOR)
 
     detector_params: cv.aruco.DetectorParameters = cv.aruco.DetectorParameters()
@@ -33,18 +34,28 @@ def detect_aruco(image_path: str) -> tuple:
 
     (marker_corners, marker_ids, rejected_candidates) = result
 
-    print("results:\n")
-    print(f"marker corners: {marker_corners}")
-    print(f"marker ids: {marker_ids}")
-    print(f"Rejected Candidates: {rejected_candidates}")
+    logger.debug(
+        f"results:\n marker corners: {marker_corners} \n marker ids: {marker_ids} \n Rejected Candidates: {rejected_candidates}"
+    )
 
     output_image: MatLike = input_image.copy()
     aruco.drawDetectedMarkers(output_image, marker_corners, marker_ids)
 
-    cv.imshow("output", output_image)
-    cv.waitKey(0)
+    if show_img:
+        cv.imshow("output", output_image)
 
     return marker_corners, marker_ids, rejected_candidates
+
+
+def get_arucos_positions(corners) -> list:
+    positions = []
+    for corner in corners:
+        # Calculate the center of the marker
+        center = np.mean(corner[0], axis=0)
+        positions.append(center)
+
+    logger.debug(positions)
+    return positions
 
 
 def estimate_pose_aruco(
@@ -65,7 +76,7 @@ def estimate_pose_aruco(
     tick = cv.getTickCount()
 
     # detect markers
-    print(f"searching for aruco markers in image {image_path}")
+    logger.info(f"searching for aruco markers in image {image_path}")
     input_image: MatLike = cv.imread(image_path, cv.IMREAD_COLOR)
     detector_params: cv.aruco.DetectorParameters = cv.aruco.DetectorParameters()
     dictionary: cv.aruco.Dictionary = cv.aruco.getPredefinedDictionary(
@@ -79,15 +90,15 @@ def estimate_pose_aruco(
     n_markers: int = len(marker_corners)
     n_ids: int = len(marker_ids)
 
-    print(f"detected {n_markers} markers")
-    print(f"detected ids: {marker_ids}")
+    logger.debug(f"detected {n_markers} markers \n detected ids: {marker_ids}")
 
     if estimate_pose:
         # Calculate pose for each marker
         for i in range(n_markers):
-            print(f"calculating pose for marker {marker_ids[i]}")
-            print(f"marker corners: {marker_corners[i][0]}")
-            print(f"obj points: {obj_points}")
+            logger.info(f"calculating pose for marker {marker_ids[i]}")
+            logger.debug(
+                f"marker corners: {marker_corners[i][0]} \n obj points: {obj_points}"
+            )
 
             ret, rvec, tvec = cv.solvePnP(
                 obj_points,
@@ -96,13 +107,13 @@ def estimate_pose_aruco(
                 dist_coeffs,
             )
             if not ret:
-                print(f"Pose estimation failed for marker {marker_ids[i]}")
+                logger.warning(f"Pose estimation failed for marker {marker_ids[i]}")
 
             rvecs.append(rvec)
             tvecs.append(tvec)
 
         current_time = (cv.getTickCount() - tick) / cv.getTickFrequency()
-        print(f"Detection Time = {current_time * 1000} ms")
+        logger.info(f"Detection Time = {current_time * 1000} ms")
 
     # draw results
     input_image = cv.imread(image_path, cv.IMREAD_COLOR)
@@ -177,7 +188,7 @@ def detect_aruco_camera(
         ret, image = camera.read()
 
         if not ret:
-            print("failed to grab frame")
+            logger.warning("failed to grab frame")
             break
 
         total_time: float = 0.0
@@ -201,14 +212,14 @@ def detect_aruco_camera(
                     marker_corners[i],
                 )
                 if not ret:
-                    print(f"Pose estimation failed for marker {marker_ids[i]}")
+                    logger.warning(f"Pose estimation failed for marker {marker_ids[i]}")
 
         current_time = (cv.getTickCount() - tick) / cv.getTickFrequency()
         total_time += current_time
         total_iterations += 1
 
         if total_iterations % 30 == 0:
-            print(
+            logger.info(
                 f"Detection Time = {current_time * 1000} ms "
                 f"(Mean = {1000 * total_time / total_iterations} ms)"
             )
