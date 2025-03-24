@@ -6,6 +6,8 @@ from cv2 import aruco
 from cv2.typing import MatLike
 from loguru import logger
 
+from .._utils import read_parameters
+
 
 def get_aruco_tag(aruco_id: int, size_in_pixels: int = 200) -> MatLike:
     logger.info(f"generating aruco tag for id {aruco_id}")

@@ -216,6 +216,8 @@ def get_charucos_positions(image: np.ndarray, mtx: np.ndarray, dst: np.ndarray) 
         Zx, Zy, Zz = tvec[0][0], tvec[1][0], tvec[2][0]
         fx, fy = mtx[0][0], mtx[1][1]
 
+        logger.debug(f"Zx: {Zx}; Zy: {Zy}; Zz: {Zz}")
+        logger.debug(f"fx: {fx}; fy: {fy}")
         logger.info(f"Zz = {Zz}\nfx = {fx}")
 
 

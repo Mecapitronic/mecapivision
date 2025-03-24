@@ -1,5 +1,7 @@
 from py5 import Sketch
 
+from .detection import aruco
+
 # Define the size of the plane in meters
 PLANE_WIDTH = 5.0
 PLANE_HEIGHT = 3.0
@@ -7,8 +9,6 @@ PLANE_HEIGHT = 3.0
 # Define the size of the window in pixels
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 600
-
-from .detection import aruco
 
 
 class ArucoSketch(Sketch):
