@@ -1,6 +1,6 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
-#  To debug locally https://blog.harshcasper.com/debugging-github-actions-workflows-effectively#heading-running-workflows-locally-using-act
+# To debug locally https://blog.harshcasper.com/debugging-github-actions-workflows-effectively#heading-running-workflows-locally-using-act
 name: Python application
 
 on:
@@ -52,9 +52,9 @@ jobs:
     - name: Lint with flake8
       if: success() || failure()
       # check for Python syntax errors or undefined names; the GitHub editor is 127 chars wide
-        run: |
-          uv run flake8 src --count --select=E9,F63,F7,F82 --show-source --statistics --max-line-length 90 --max-doc-length 100
-          uv run flake8 src --count --max-complexity=10 --max-line-length=127 --statistics --max-line-length 90 --max-doc-length 100
+      run: |
+        uv run flake8 src --count --select=E9,F63,F7,F82 --show-source --statistics --max-line-length 90 --max-doc-length 100
+        uv run flake8 src --count --max-complexity=10 --max-line-length=127 --statistics --max-line-length 90 --max-doc-length 100
 
     - name: Run tests
       if: success() || failure()
