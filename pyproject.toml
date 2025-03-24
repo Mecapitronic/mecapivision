@@ -26,7 +26,6 @@ vision = "mecapivision:main"
 record = "mecapivision:record_pictures_cli"
 calibrate = "mecapivision:calibrate_camera_from_pictures"
 detect = "mecapivision:cli"
-processing = "mecapivision:processing"
 charuco = "mecapivision:calibrate_charuco"
 
 [tool.uv]
