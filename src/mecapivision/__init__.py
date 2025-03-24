@@ -2,6 +2,7 @@ from .__main__ import main
 from .calibration import (
     calibrate_camera_from_livestream,
     calibrate_camera_from_pictures,
+    calibrate_charuco,
     calibrate_fake_camera,
     record_pictures_cli,
 )
@@ -16,4 +17,5 @@ __all__ = [
     "calibrate_camera_from_livestream",
     "calibrate_camera_from_pictures",
     "processing",
+    "calibrate_charuco",
 ]

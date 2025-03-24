@@ -10,7 +10,7 @@ requires-python = ">=3.10"
 dependencies = [
     "click>=8.1.8",
     "loguru>=0.7.3",
-    "opencv-python>=4.11.0.86",
+    "opencv-contrib-python>=4.11.0.86",
     "py5>=0.10.4a2",
 ]
 
@@ -27,6 +27,7 @@ record = "mecapivision:record_pictures_cli"
 calibrate = "mecapivision:calibrate_camera_from_pictures"
 detect = "mecapivision:cli"
 processing = "mecapivision:processing"
+charuco = "mecapivision:calibrate_charuco"
 
 [tool.uv]
 package = true

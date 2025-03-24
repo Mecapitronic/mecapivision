@@ -3,11 +3,16 @@ Source: https://medium.com/@nflorent7/a-comprehensive-guide-to-camera-calibratio
 """
 
 import json
+import os
 
+import click
 import cv2
 import numpy as np
 from loguru import logger
 
+from .._settings import calibration_folder
+
+# CONSTANTS
 ARUCO_DICT = cv2.aruco.DICT_6X6_250  # Dictionary ID
 SQUARES_VERTICALLY = 7  # Number of squares vertically
 SQUARES_HORIZONTALLY = 5  # Number of squares horizontally
@@ -20,7 +25,6 @@ def create_and_save_new_board(output_name: str = "ChArUco_Marker.png") -> None:
     """Create and save a new Charuco board in order to calibrate the camera.
     You can also use a ChArUco generator such as calib.io
     """
-
     dictionary = cv2.aruco.getPredefinedDictionary(ARUCO_DICT)
     board = cv2.aruco.CharucoBoard(
         (SQUARES_VERTICALLY, SQUARES_HORIZONTALLY),
@@ -30,7 +34,6 @@ def create_and_save_new_board(output_name: str = "ChArUco_Marker.png") -> None:
     )
     size_ratio = SQUARES_HORIZONTALLY / SQUARES_VERTICALLY
     logger.info(f"Board size ratio: {size_ratio}")
-
     IMG_SIZE = tuple(
         i * SQUARE_LENGTH + 2 * MARGIN_PX
         for i in (SQUARES_VERTICALLY, SQUARES_HORIZONTALLY)
@@ -39,7 +42,16 @@ def create_and_save_new_board(output_name: str = "ChArUco_Marker.png") -> None:
     cv2.imwrite(output_name, img)
 
 
-def get_calibration_parameters(img_dir):
+def get_calibration_parameters(img_dir: str) -> tuple[np.ndarray, np.ndarray]:
+    """Get the calibration parameters from a set of images of a Charuco board
+
+    Args:
+        img_dir (str): folder where to find pictures taken with the camera to calibrate
+
+    Returns:
+        tuple[np.ndarray, np.ndarray]: camera matrix and distortion coefficients
+    """
+    logger.info("Getting calibration parameters from Charuco board")
     # Define the aruco dictionary, charuco board and detector
     dictionary = cv2.aruco.getPredefinedDictionary(ARUCO_DICT)
     board = cv2.aruco.CharucoBoard(
@@ -53,7 +65,7 @@ def get_calibration_parameters(img_dir):
 
     # Load images from directory
     image_files = [
-        os.path.join(img_dir, f) for f in os.listdir(img_dir) if f.endswith(".bmp")
+        os.path.join(img_dir, f) for f in os.listdir(img_dir) if f.endswith(".jpg")
     ]
     all_charuco_ids = []
     all_charuco_corners = []
@@ -62,28 +74,58 @@ def get_calibration_parameters(img_dir):
     for image_file in image_files:
         image = cv2.imread(image_file)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        imgSize = image.shape
+        image_size = image.shape
         image_copy = image.copy()
-        marker_corners, marker_ids, rejectedCandidates = detector.detectMarkers(image)
+        # old way
+        # marker_corners, marker_ids, rejectedCandidates = detector.detectMarkers(image)
+        charucodetector = cv2.aruco.CharucoDetector(board)
 
-        if len(marker_ids) > 0:  # If at least one marker is detected
-            # cv2.aruco.drawDetectedMarkers(image_copy, marker_corners, marker_ids)
-            ret, charucoCorners, charucoIds = cv2.aruco.interpolateCornersCharuco(
-                marker_corners, marker_ids, image, board
-            )
+        # old way
+        # ret, charucoCorners, charucoIds = cv2.interpolateCornersCharuco(marker_corners, marker_ids, image, board)
+        charuco_corners, charuco_ids, marker_corners, marker_ids = (
+            charucodetector.detectBoard(image)
+        )
 
-            if charucoIds is not None and len(charucoCorners) > 3:
-                all_charuco_corners.append(charucoCorners)
-                all_charuco_ids.append(charucoIds)
+        # logger.debug(f"Charuco corners: {charuco_corners}")
+        # logger.debug(f"Charuco ids: {charuco_ids}")
+        # logger.debug(f"Marker corners: {marker_corners}")
+        # logger.debug(f"Marker ids: {marker_ids}")
 
+        # If at least one marker is detected
+        if marker_ids is not None:
+            logger.debug("Markers detected")
+            cv2.aruco.drawDetectedMarkers(image_copy, marker_corners, marker_ids)
+
+            if charuco_ids is not None and len(charuco_corners) > 3:
+                logger.debug("Charuco corners found")
+                all_charuco_corners.append(charuco_corners)
+                all_charuco_ids.append(charuco_ids)
+
+    logger.debug(f"Charuco corners: {all_charuco_corners}")
+    logger.debug(f"Charuco ids: {all_charuco_ids}")
     # Calibrate camera with extracted information
-    result, mtx, dist, rvecs, tvecs = cv2.aruco.calibrateCameraCharuco(
-        all_charuco_corners, all_charuco_ids, board, imgSize, None, None
+    # Now that we've seen all of our images, perform the camera calibration
+    # based on the set of points we've discovered
+    result, camera_matrix, dist_coeffs, rvecs, tvecs = cv2.aruco.calibrateCameraCharuco(
+        charucoCorners=all_charuco_corners,
+        charucoIds=all_charuco_ids,
+        board=board,
+        imageSize=image_size,
+        cameraMatrix=None,
+        distCoeffs=None,
+        rvecs=None,
+        tvecs=None,
     )
-    return mtx, dist
+
+    logger.info(f"Calibration result: {result}")
+    logger.debug(
+        f"Camera matrix:\n{camera_matrix}\nDistortion coefficients:\n{dist_coeffs}"
+    )
+    return camera_matrix, dist_coeffs
 
 
 def save_calibration_to_json(json_file_path: str = "calibration.json"):
+    logger.info("Saving calibration data to JSON file")
     SENSOR = "monochrome"
     LENS = "kowa_f12mm_F1.8"
 
@@ -99,6 +141,7 @@ def save_calibration_to_json(json_file_path: str = "calibration.json"):
 def load_calibration(
     json_file_path: str = "./calibration.json",
 ) -> tuple[np.ndarray, np.ndarray]:
+    logger.info("Loading calibration data from JSON file")
     with open(json_file_path, "r") as file:  # Read the JSON file
         json_data = json.load(file)
 
@@ -108,24 +151,25 @@ def load_calibration(
     return mtx, dst
 
 
-def undistort() -> np.ndarray:
+def undistort_image(image_path: str, mtx, dst) -> np.ndarray:
     """Undistort an image using the calibration parameters
 
     Returns:
         np.ndarray: undistorted image
     """
-    image_path = "./charuco/charuco_WD441.bmp"
+    logger.info(f"Undistorting image {image_path}")
     image = cv2.imread(image_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     h, w = image.shape[:2]
-    newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dst, (w, h), 1, (w, h))
+    newcameramtx, roi = cv2.getOptimalNewCamera_matrix(mtx, dst, (w, h), 1, (w, h))
     image = cv2.undistort(image, mtx, dst, None, newcameramtx)
 
     return image
 
 
 def get_charucos_positions(image: np.ndarray, mtx: np.ndarray, dst: np.ndarray) -> None:
+    logger.info("Getting Charuco board position")
     all_charuco_ids = []
     all_charuco_corners = []
 
@@ -177,9 +221,15 @@ def perspective_function(x, Z, f):
     return x * Z / f
 
 
-if __name__ == "__main__":
-    get_calibration_parameters(img_dir="./images/")
+@click.command()
+@click.option(
+    "--img_dir", default=calibration_folder, help="Directory containing images"
+)
+def calibrate_charuco(img_dir: str) -> None:
+    logger.info("Calibrating camera using Charuco board")
+
+    _, _ = get_calibration_parameters(img_dir)
     save_calibration_to_json(json_file_path="calibration.json")
     mtx, dst = load_calibration(json_file_path="calibration.json")
-    image = undistort()
+    image = undistort_image("my_calib/charuco14.jpg", mtx, dst)
     get_charucos_positions(image, mtx, dst)

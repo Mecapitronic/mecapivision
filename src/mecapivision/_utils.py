@@ -1,13 +1,15 @@
 from glob import glob
 from pathlib import Path
-from loguru import logger
 
 import cv2 as cv
+from loguru import logger
 from numpy import load, ndarray, savez
+
 from ._settings import camera_calibration_file
+
 CANT_RECEIVE_FRAME = "Can't receive frame (stream end)"
 
-PICTURES_FOLDER = "my_calib/"
+PICTURES_FOLDER = "my_calib"
 DEFAULT_NAME = "chessboard_"
 
 
@@ -129,7 +131,9 @@ def print_reprojection_error(
         error = cv.norm(imgpoints[i], imgpoints2, cv.NORM_L2) / len(imgpoints2)
         mean_error += error
 
-    logger.info("total error (closer to 0 is better): {}".format(mean_error / len(objpoints)))
+    logger.info(
+        "total error (closer to 0 is better): {}".format(mean_error / len(objpoints))
+    )
 
 
 def record_camera_stream():

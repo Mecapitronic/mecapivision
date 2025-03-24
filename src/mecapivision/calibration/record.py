@@ -1,9 +1,11 @@
 from pathlib import Path
-from loguru import logger
-import cv2 as cv
+
 import click
+import cv2 as cv
+from loguru import logger
 
 from .._utils import CANT_RECEIVE_FRAME, DEFAULT_NAME, PICTURES_FOLDER, get_last_camera
+
 
 @click.command()
 @click.option(
@@ -24,9 +26,12 @@ from .._utils import CANT_RECEIVE_FRAME, DEFAULT_NAME, PICTURES_FOLDER, get_last
     default=10,
     help="Number of pictures needed",
 )
-
-def record_pictures_cli(nb_pictures_needed: int, pictures_folder: str,pictures_basename: str ) -> None:
-    record_pictures(get_last_camera(), pictures_folder, pictures_basename, nb_pictures_needed)
+def record_pictures_cli(
+    nb_pictures_needed: int, pictures_folder: str, pictures_basename: str
+) -> None:
+    record_pictures(
+        get_last_camera(), pictures_folder, pictures_basename, nb_pictures_needed
+    )
 
 
 def record_pictures(
