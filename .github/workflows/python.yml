@@ -39,26 +39,25 @@ jobs:
     - name: Install dependencies
       run: uv sync --all-extras --dev
 
-    - name: Run tests
-      # For example, using `pytest`
-      run: uv run pytest tests
-
     - name: Analysing the code with ruff
+      if: success() || failure()
       run: uv run ruff check --output-format=github src
 
     - name: check typing with mypy
+      if: success() || failure()
       run: uv run mypy src
 
     # bug in pylint with cv2: E1101: Module 'cv2' has no '' member (no-member)
     # https://github.com/pylint-dev/pylint/issues/10027
     - name: Lint with flake8
+      if: success() || failure()
       run: |
         # stop the build if there are Python syntax errors or undefined names
         uv run flake8 src --count --select=E9,F63,F7,F82 --show-source --statistics --max-line-length 90 --max-doc-length 100
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         uv run flake8 src --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --max-line-length 90 --max-doc-length 100
 
-    - name: Test with pytest
-      run: |
-        uv run pytest
+    - name: Run tests
+      if: success() || failure()
+      run: uv run pytest tests
 
