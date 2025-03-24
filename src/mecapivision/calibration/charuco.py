@@ -16,12 +16,12 @@ from .._settings import calibration_folder
 ARUCO_DICT = cv2.aruco.DICT_6X6_250  # Dictionary ID
 SQUARES_VERTICALLY = 7  # Number of squares vertically
 SQUARES_HORIZONTALLY = 5  # Number of squares horizontally
-SQUARE_LENGTH = 30  # Square side length (in pixels)
-MARKER_LENGTH = 15  # ArUco marker side length (in pixels)
+SQUARE_LENGTH = 40  # Square side length (in pixels)
+MARKER_LENGTH = 20  # ArUco marker side length (in pixels)
 MARGIN_PX = 20  # Margins size (in pixels)
 
 
-def create_and_save_new_board(output_name: str = "ChArUco_Marker.png") -> None:
+def create_and_save_new_board(output_name: str = "charuco_marker.png") -> None:
     """Create and save a new Charuco board in order to calibrate the camera.
     You can also use a ChArUco generator such as calib.io
     """
@@ -42,7 +42,9 @@ def create_and_save_new_board(output_name: str = "ChArUco_Marker.png") -> None:
     cv2.imwrite(output_name, img)
 
 
-def get_calibration_parameters(img_dir: str) -> tuple[np.ndarray, np.ndarray]:
+def get_calibration_parameters(
+    img_dir: str, show_img: bool = False
+) -> tuple[np.ndarray, np.ndarray]:
     """Get the calibration parameters from a set of images of a Charuco board
 
     Args:
@@ -60,8 +62,7 @@ def get_calibration_parameters(img_dir: str) -> tuple[np.ndarray, np.ndarray]:
         MARKER_LENGTH,
         dictionary,
     )
-    params = cv2.aruco.DetectorParameters()
-    detector = cv2.aruco.ArucoDetector(dictionary, params)
+    charucodetector = cv2.aruco.CharucoDetector(board)
 
     # Load images from directory
     image_files = [
@@ -75,27 +76,28 @@ def get_calibration_parameters(img_dir: str) -> tuple[np.ndarray, np.ndarray]:
         image = cv2.imread(image_file)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         image_size = image.shape
-        image_copy = image.copy()
-        # old way
-        # marker_corners, marker_ids, rejectedCandidates = detector.detectMarkers(image)
-        charucodetector = cv2.aruco.CharucoDetector(board)
 
         # old way
+        # marker_corners, marker_ids, rejectedCandidates = detector.detectMarkers(image)
         # ret, charucoCorners, charucoIds = cv2.interpolateCornersCharuco(marker_corners, marker_ids, image, board)
         charuco_corners, charuco_ids, marker_corners, marker_ids = (
             charucodetector.detectBoard(image)
         )
 
-        # logger.debug(f"Charuco corners: {charuco_corners}")
-        # logger.debug(f"Charuco ids: {charuco_ids}")
-        # logger.debug(f"Marker corners: {marker_corners}")
-        # logger.debug(f"Marker ids: {marker_ids}")
-
         # If at least one marker is detected
         if marker_ids is not None:
             logger.debug("Markers detected")
-            cv2.aruco.drawDetectedMarkers(image_copy, marker_corners, marker_ids)
 
+            if show_img:
+                image_copy = image.copy()
+                cv2.aruco.drawDetectedMarkers(image_copy, marker_corners, marker_ids)
+                cv2.imshow("Markers", image_copy)
+                cv2.waitKey(0)
+                cv2.destroyAllWindows()
+
+            logger.debug(
+                f"Charuco ID: {charuco_ids}; Charuco corners: {charuco_corners}"
+            )
             if charuco_ids is not None and len(charuco_corners) > 3:
                 logger.debug("Charuco corners found")
                 all_charuco_corners.append(charuco_corners)
@@ -228,7 +230,7 @@ def perspective_function(x, Z, f):
 def calibrate_charuco(img_dir: str) -> None:
     logger.info("Calibrating camera using Charuco board")
 
-    _, _ = get_calibration_parameters(img_dir)
+    _, _ = get_calibration_parameters(img_dir, show_img=True)
     save_calibration_to_json(json_file_path="calibration.json")
     mtx, dst = load_calibration(json_file_path="calibration.json")
     image = undistort_image("my_calib/charuco14.jpg", mtx, dst)
