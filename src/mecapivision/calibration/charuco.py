@@ -171,7 +171,7 @@ def undistort_image(image_path: str, mtx, dst) -> np.ndarray:
     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     h, w = image.shape[:2]
-    newcameramtx, roi = cv2.getOptimalNewCamera_matrix(mtx, dst, (w, h), 1, (w, h))
+    newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dst, (w, h), 1, (w, h))
     image = cv2.undistort(image, mtx, dst, None, newcameramtx)
 
     return image
@@ -242,3 +242,6 @@ def calibrate_charuco(img_dir: str) -> None:
     mtx, dst = load_calibration(json_file_path="calibration_webcam_thinkpad.json")
     image = undistort_image("my_calib/my_calibchessboard_14.jpg", mtx, dst)
     get_charucos_positions(image, mtx, dst)
+    cv2.imshow("Undistorted image", image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
