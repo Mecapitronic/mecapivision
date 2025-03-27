@@ -4,6 +4,7 @@ Source: https://medium.com/@nflorent7/a-comprehensive-guide-to-camera-calibratio
 
 import json
 import os
+import sys
 
 import click
 import cv2
@@ -14,10 +15,10 @@ from .._settings import calibration_folder
 
 # CONSTANTS
 ARUCO_DICT = cv2.aruco.DICT_6X6_250  # Dictionary ID
-SQUARES_VERTICALLY = 7  # Number of squares vertically
-SQUARES_HORIZONTALLY = 5  # Number of squares horizontally
+SQUARES_VERTICALLY = 5  # Number of squares vertically
+SQUARES_HORIZONTALLY = 7  # Number of squares horizontally
 SQUARE_LENGTH = 40  # Square side length (in pixels)
-MARKER_LENGTH = 20  # ArUco marker side length (in pixels)
+MARKER_LENGTH = 25  # ArUco marker side length (in pixels)
 MARGIN_PX = 20  # Margins size (in pixels)
 
 
@@ -40,6 +41,10 @@ def create_and_save_new_board(output_name: str = "charuco_marker.png") -> None:
     )
     img = cv2.aruco.CharucoBoard.generateImage(board, IMG_SIZE, marginSize=MARGIN_PX)
     cv2.imwrite(output_name, img)
+    cv2.imshow("Charuco board", img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    logger.info(f"Charuco board saved as {output_name}")
 
 
 def get_calibration_parameters(
@@ -230,6 +235,8 @@ def perspective_function(x, Z, f):
     "--img_dir", default=calibration_folder, help="Directory containing images"
 )
 def calibrate_charuco(img_dir: str) -> None:
+    create_and_save_new_board()
+    sys.exit(0)
     logger.info("Calibrating camera using Charuco board")
 
     _, _ = get_calibration_parameters(img_dir, show_img=True)
