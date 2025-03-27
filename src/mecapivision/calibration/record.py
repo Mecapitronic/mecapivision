@@ -23,7 +23,7 @@ from .._utils import CANT_RECEIVE_FRAME, DEFAULT_NAME, PICTURES_FOLDER, get_last
 @click.option(
     "--nb_pictures_needed",
     "-p",
-    default=10,
+    default=0,
     help="Number of pictures needed",
 )
 def record_pictures_cli(
@@ -38,7 +38,7 @@ def record_pictures(
     video: str,
     pictures_folder: str,
     pictures_basename: str,
-    nb_pictures_needed: int = 10,
+    nb_pictures_needed: int,
 ) -> None:
     logger.info("Recording pictures. Press 'r' to take a picture, 'q' to quit")
 
@@ -48,6 +48,8 @@ def record_pictures(
 
     Path(pictures_folder).mkdir(parents=True, exist_ok=True)
     nb_pictures_taken = 0
+    if nb_pictures_needed == 0:
+        nb_pictures_needed = 1000000
 
     while camera.isOpened():
         ret, image = camera.read()
@@ -60,7 +62,7 @@ def record_pictures(
 
         if cv.waitKey(10) & 0xFF == ord("r"):
             cv.imwrite(
-                f"{pictures_folder}{pictures_basename}{nb_pictures_taken}.jpg", image
+                f"{pictures_folder}/{pictures_basename}_{nb_pictures_taken}.jpg", image
             )
             nb_pictures_taken += 1
             print(f"Picture taken: {nb_pictures_taken}   \r", end=" ")

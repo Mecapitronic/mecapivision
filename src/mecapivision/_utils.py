@@ -10,7 +10,7 @@ from ._settings import camera_calibration_file
 CANT_RECEIVE_FRAME = "Can't receive frame (stream end)"
 
 PICTURES_FOLDER = "my_calib"
-DEFAULT_NAME = "chessboard_"
+DEFAULT_NAME = "chessboard"
 
 
 def list_cameras() -> list[str]:

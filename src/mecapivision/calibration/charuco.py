@@ -4,7 +4,6 @@ Source: https://medium.com/@nflorent7/a-comprehensive-guide-to-camera-calibratio
 
 import json
 import os
-import sys
 
 import click
 import cv2
@@ -131,12 +130,15 @@ def get_calibration_parameters(
     return camera_matrix, dist_coeffs
 
 
-def save_calibration_to_json(json_file_path: str = "calibration.json"):
+def save_calibration_to_json(
+    mtx: np.array,
+    dist: np.array,
+    json_file_path: str = "calibration.json",
+) -> None:
     logger.info("Saving calibration data to JSON file")
     SENSOR = "monochrome"
     LENS = "kowa_f12mm_F1.8"
 
-    mtx, dist = get_calibration_parameters(img_dir="./images/")
     data = {"sensor": SENSOR, "lens": LENS, "mtx": mtx.tolist(), "dist": dist.tolist()}
 
     with open(json_file_path, "w") as json_file:
@@ -235,12 +237,8 @@ def perspective_function(x, Z, f):
     "--img_dir", default=calibration_folder, help="Directory containing images"
 )
 def calibrate_charuco(img_dir: str) -> None:
-    create_and_save_new_board()
-    sys.exit(0)
-    logger.info("Calibrating camera using Charuco board")
-
-    _, _ = get_calibration_parameters(img_dir, show_img=True)
-    save_calibration_to_json(json_file_path="calibration.json")
-    mtx, dst = load_calibration(json_file_path="calibration.json")
-    image = undistort_image("my_calib/charuco14.jpg", mtx, dst)
+    mtx, dst = get_calibration_parameters(img_dir, show_img=False)
+    save_calibration_to_json(mtx, dst, "calibration_webcam_thinkpad.json")
+    mtx, dst = load_calibration(json_file_path="calibration_webcam_thinkpad.json")
+    image = undistort_image("my_calib/my_calibchessboard_14.jpg", mtx, dst)
     get_charucos_positions(image, mtx, dst)
