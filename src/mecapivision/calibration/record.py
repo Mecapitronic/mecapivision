@@ -23,7 +23,7 @@ from .._utils import CANT_RECEIVE_FRAME, DEFAULT_NAME, PICTURES_FOLDER, get_last
 @click.option(
     "--nb_pictures_needed",
     "-p",
-    default=0,
+    default=10,
     help="Number of pictures needed",
 )
 def record_pictures_cli(
@@ -40,7 +40,10 @@ def record_pictures(
     pictures_basename: str,
     nb_pictures_needed: int,
 ) -> None:
-    logger.info("Recording pictures. Press 'r' to take a picture, 'q' to quit")
+
+    if nb_pictures_needed == 0:
+        nb_pictures_needed = 1000000
+    logger.info(f"Recording {nb_pictures_needed} pictures. Press 'r' to take a picture, 'q' to quit")
 
     logger.info(f"Opening camera {video}")
     camera = open_camera(video)
@@ -49,10 +52,8 @@ def record_pictures(
 
     Path(pictures_folder).mkdir(parents=True, exist_ok=True)
     nb_pictures_taken = 0
-    if nb_pictures_needed == 0:
-        nb_pictures_needed = 1000000
 
-    while camera.isOpened():
+    while camera.isOpened() and nb_pictures_taken < nb_pictures_needed:
         ret, image = camera.read()
 
         if not ret:
@@ -61,21 +62,21 @@ def record_pictures(
 
         cv.imshow("captured picture", image)
 
-        if cv.waitKey(10) & 0xFF == ord("r"):
+        key = cv.waitKey(1) & 0xFF  # waitKey UNE SEULE FOIS
+        if key == ord("r"):
             cv.imwrite(
                 f"{pictures_folder}/{pictures_basename}_{nb_pictures_taken}.jpg", image
             )
             nb_pictures_taken += 1
             print(f"Picture taken: {nb_pictures_taken}   \r", end=" ")
 
-        if cv.waitKey(10) & 0xFF == ord("q"):
+        if key == ord("q"):
             break
 
-        if nb_pictures_taken == nb_pictures_needed:
+        if nb_pictures_taken > nb_pictures_needed:
             break
 
     camera.release()
     cv.destroyAllWindows()
 
-    logger.info(f"{nb_pictures_taken} pictures taken")
-    logger.info(f"pictures saved in {pictures_folder}/{pictures_basename}0.jpg")
+    logger.info(f"{nb_pictures_taken} pictures taken and saved in {pictures_folder}/")
