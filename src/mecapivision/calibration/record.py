@@ -4,7 +4,7 @@ import click
 import cv2 as cv
 from loguru import logger
 
-from .._utils import CANT_RECEIVE_FRAME, DEFAULT_NAME, PICTURES_FOLDER, get_last_camera
+from .._utils import CANT_RECEIVE_FRAME, DEFAULT_NAME, PICTURES_FOLDER, get_last_camera, open_camera
 
 
 @click.command()
@@ -42,7 +42,8 @@ def record_pictures(
 ) -> None:
     logger.info("Recording pictures. Press 'r' to take a picture, 'q' to quit")
 
-    camera = cv.VideoCapture(video)
+    logger.info(f"Opening camera {video}")
+    camera = open_camera(video)
     camera.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
     camera.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
 

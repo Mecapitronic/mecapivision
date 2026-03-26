@@ -6,7 +6,7 @@ from cv2 import aruco
 from cv2.typing import MatLike
 from loguru import logger
 
-from .._utils import read_parameters
+from .._utils import read_parameters, open_camera
 
 
 def get_aruco_tag(aruco_id: int, size_in_pixels: int = 200) -> MatLike:
@@ -166,7 +166,7 @@ def detect_aruco_camera(
     detector = cv.aruco.ArucoDetector(dictionary, detector_params)
 
     # init camera capture
-    camera = cv.VideoCapture(camera_id)
+    camera = open_camera(camera_id)
 
     camera_matrix, dist_coeffs = read_parameters()
     rvecs: list[Any] = []

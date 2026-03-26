@@ -1,11 +1,10 @@
 import cv2 as cv
 from numpy import ndarray
 
-CANT_RECEIVE_FRAME = "Can't receive frame (stream end)"
-
+from .._utils import open_camera, CANT_RECEIVE_FRAME
 
 def undistort_livestream(video: str, mtx, dist) -> None:
-    camera = cv.VideoCapture(video)
+    camera = open_camera(video)
     camera.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
     camera.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
 

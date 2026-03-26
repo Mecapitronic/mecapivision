@@ -11,6 +11,7 @@ from .._utils import (
     CANT_RECEIVE_FRAME,
     get_last_camera,
     load_camera_calibration,
+    open_camera,
 )
 
 
@@ -31,7 +32,7 @@ def detect_aruco_live(
 ) -> None:
     logger.info("Live detection. Press 'q' to quit")
 
-    camera = cv.VideoCapture(video)
+    camera = open_camera(video)
     camera.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
     camera.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
 

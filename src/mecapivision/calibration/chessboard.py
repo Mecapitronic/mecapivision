@@ -23,6 +23,7 @@ from .._utils import (
     get_last_camera,
     print_reprojection_error,
     save_camera_calibration,
+    open_camera,
 )
 from .record import DEFAULT_NAME, PICTURES_FOLDER
 from .undistort import undistort_image, undistort_livestream
@@ -137,7 +138,7 @@ def analyse_chessboards_live(
     imgpoints = []  # 2d points in image plane.
 
     logger.info("opening camera to get chessboard pictures")
-    camera = cv.VideoCapture(video)
+    camera = open_camera(video)
     camera.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
     camera.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
 

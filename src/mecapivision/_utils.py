@@ -1,5 +1,6 @@
 from glob import glob
 from pathlib import Path
+import platform
 
 import cv2 as cv
 from loguru import logger
@@ -15,20 +16,24 @@ DEFAULT_NAME = "chessboard"
 
 def list_cameras() -> list[str]:
     available_cameras: list[str] = []
-    for cam in glob("/dev/video*"):
-        camera = cv.VideoCapture(cam)
-        if not camera.isOpened():
-            logger.debug(f"camera {cam} is not available")
-        else:
+
+    if platform.system() == "Windows":
+        # Sur Windows, tester les indices 0-4
+        max_cam = range(4)
+    else:
+        # Sur Linux/Unix, utiliser /dev/video*
+        max_cam = glob("/dev/video*")
+
+    for cam in max_cam:
+        camera = open_camera(cam)
+        if camera.isOpened():
             logger.debug(f"camera {cam} is available")
             frame_width = int(camera.get(cv.CAP_PROP_FRAME_WIDTH))
             frame_height = int(camera.get(cv.CAP_PROP_FRAME_HEIGHT))
             logger.debug(f"camera frame width: {frame_width}")
             logger.debug(f"camera frame height: {frame_height}")
-
-            available_cameras.append(cam)
-            camera.release()
-
+            available_cameras.append(str(cam))
+        camera.release()
     return available_cameras
 
 
@@ -37,13 +42,45 @@ def get_last_camera() -> str:
     in laptops, if we have an external camera, it will be the last one.
 
     Returns:
-        str: camera device file path in /dev
+        str: camera device file path in /dev on Linux, or camera index on Windows
     """
     available_cameras = list_cameras()
-    available_cameras.sort()
+
+    if platform.system() == "Windows":
+        # Sur Windows, faire un tri numérique pour obtenir l'index le plus haut
+        available_cameras.sort(key=int)
+    else:
+        # Sur Linux, tri alphabétique
+        available_cameras.sort()
+
     logger.debug(available_cameras)
     return available_cameras[-1]
 
+def open_camera(index):
+
+    if platform.system() == "Windows":
+        index = int(index)
+
+    # Essai DSHOW
+    cam = cv.VideoCapture(index, cv.CAP_DSHOW)
+    if cam.isOpened():
+        print("✅ DSHOW OK")
+        return cam
+
+    # Essai MSMF
+    cam = cv.VideoCapture(index, cv.CAP_MSMF)
+    if cam.isOpened():
+        print("✅ MSMF OK")
+        return cam
+
+    # Fallback
+    cam = cv.VideoCapture(index)
+    if cam.isOpened():
+        print("✅ DEFAULT OK")
+        return cam
+
+    print("❌ Impossible d'ouvrir la caméra")
+    return cam
 
 def print_calibration_result(mtx, dist) -> None:
     # Print the calibration results
@@ -138,7 +175,7 @@ def print_reprojection_error(
 
 def record_camera_stream():
     # Open the default camera
-    cam = cv.VideoCapture(0)
+    cam = cv.VideoCapture(get_last_camera(), cv.CAP_DSHOW)
 
     # Get the default frame width and height
     frame_width = int(cam.get(cv.CAP_PROP_FRAME_WIDTH))
