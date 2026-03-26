@@ -8,6 +8,36 @@ ouvrez dans le devcontainer avec vscode pour que ça soit plus simple.
 uv run main.py
 ```
 
+## 1. Installation
+
+Il est fortement recommandé d'utiliser un environnement virtuel Python pour exécuter ce projet afin d'isoler les dépendances de **mecapivision**.
+
+### 1.1 Créer l'environnement virtuel
+Ouvrez votre terminal à la racine du projet et exécutez la commande correspondant à votre système :
+
+```bash
+  python -m venv venv
+```
+
+### 1.2 Activer l'environnement virtuel
+```bash
+.\.venv\Scripts\activate
+```
+Une fois activé, vous devriez voir le préfixe (venv) apparaître au tout début de la ligne de votre terminal.
+
+### 1.3 Installer les dépendances
+```bash
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### 1.4 Installer le package mecapivision
+```bash
+pip install .
+```
+
+### 1.5 Utiliser le package mecapivision
+
 ## Installation on RPi
 [source](https://pyimagesearch.com/2018/09/19/pip-install-opencv/)
 
