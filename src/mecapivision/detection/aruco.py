@@ -209,9 +209,9 @@ def detect_aruco_camera(
             for i in range(n_markers):
                 ret, rvecs[i], tvecs[i] = cv.solvePnP(
                     obj_points,
+                    marker_corners[i],
                     camera_matrix,
                     dist_coeffs,
-                    marker_corners[i],
                 )
                 if not ret:
                     logger.warning(f"Pose estimation failed for marker {marker_ids[i]}")
