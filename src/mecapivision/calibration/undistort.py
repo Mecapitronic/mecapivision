@@ -5,8 +5,6 @@ from .._utils import open_camera, CANT_RECEIVE_FRAME
 
 def undistort_livestream(video: str, mtx, dist) -> None:
     camera = open_camera(video)
-    camera.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
-    camera.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
 
     while True:
         ret, image = camera.read()

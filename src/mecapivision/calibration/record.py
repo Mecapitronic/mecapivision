@@ -47,8 +47,6 @@ def record_pictures(
 
     logger.info(f"Opening camera {video}")
     camera = open_camera(video)
-    camera.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
-    camera.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
 
     Path(pictures_folder).mkdir(parents=True, exist_ok=True)
     nb_pictures_taken = 0

@@ -57,6 +57,8 @@ def get_last_camera() -> str:
     return available_cameras[-1]
 
 def open_camera(index):
+width = 640
+    height = 480
 
     if platform.system() == "Windows":
         index = int(index)
@@ -65,17 +67,23 @@ def open_camera(index):
     cam = cv.VideoCapture(index, cv.CAP_DSHOW)
     if cam.isOpened():
         print("✅ DSHOW OK")
+cam.set(cv.CAP_PROP_FRAME_WIDTH, width)
+        cam.set(cv.CAP_PROP_FRAME_HEIGHT, height)
         return cam
 
     # Essai MSMF
     cam = cv.VideoCapture(index, cv.CAP_MSMF)
     if cam.isOpened():
+cam.set(cv.CAP_PROP_FRAME_WIDTH, width)
+        cam.set(cv.CAP_PROP_FRAME_HEIGHT, height)
         print("✅ MSMF OK")
         return cam
 
     # Fallback
     cam = cv.VideoCapture(index)
     if cam.isOpened():
+cam.set(cv.CAP_PROP_FRAME_WIDTH, width)
+        cam.set(cv.CAP_PROP_FRAME_HEIGHT, height)
         print("✅ DEFAULT OK")
         return cam
 

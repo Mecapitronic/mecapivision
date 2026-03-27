@@ -139,8 +139,6 @@ def analyse_chessboards_live(
 
     logger.info("opening camera to get chessboard pictures")
     camera = open_camera(video)
-    camera.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
-    camera.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
 
     logger.info(
         "Press 'r' to take a picture when the chessboard is detected. Press 'q' to quit."

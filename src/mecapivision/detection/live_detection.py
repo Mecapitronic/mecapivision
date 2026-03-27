@@ -33,8 +33,6 @@ def detect_aruco_live(
     logger.info("Live detection. Press 'q' to quit")
 
     camera = open_camera(video)
-    camera.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
-    camera.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
 
     detector = get_detector()
     camera_matrix, dist_coeffs = load_camera_calibration(calibration_file)
