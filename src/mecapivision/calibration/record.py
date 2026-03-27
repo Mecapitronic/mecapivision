@@ -4,20 +4,20 @@ import click
 import cv2 as cv
 from loguru import logger
 
-from .._utils import CANT_RECEIVE_FRAME, DEFAULT_NAME, PICTURES_FOLDER, get_last_camera, open_camera
-
+from .._utils import CANT_RECEIVE_FRAME, get_last_camera, open_camera
+from .._settings import calibration_folder,camera_calibration_file
 
 @click.command()
 @click.option(
     "--pictures_folder",
     "-f",
-    default=PICTURES_FOLDER,
+    default=calibration_folder,
     help="Folder to save the pictures",
 )
 @click.option(
     "--pictures_basename",
     "-n",
-    default=DEFAULT_NAME,
+    default="chessboard",
     help="Base name for the pictures",
 )
 @click.option(
@@ -42,7 +42,7 @@ def record_pictures(
 ) -> None:
 
     if nb_pictures_needed == 0:
-        nb_pictures_needed = 1000000
+        nb_pictures_needed = 10
     logger.info(f"Recording {nb_pictures_needed} pictures. Press 'r' to take a picture, 'q' to quit")
 
     logger.info(f"Opening camera {video}")

@@ -10,15 +10,17 @@
         "ghcr.io/va-h/devcontainers-features/uv:1": {}
     },
     "mounts": [
-        "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/vscode/.ssh,type=bind,readonly,consistency=cached",
-        "source=${localEnv:HOME}/.Xauthority,target=/home/vscode/.Xauthority,type=bind,readonly,consistency=cached",
         "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
-        "source=/dev/,target=/dev/,type=bind,consistency=consistent"
+        "source=/dev/,target=/dev/,type=bind,consistency=consistent",
+        "source=${localWorkspaceFolder}/.venv,target=/workspace/.venv,type=bind,consistency=cached"
     ],
+    "remoteEnv": {
+        "DISPLAY": "host.docker.internal:0"
+    },
     "runArgs": [
         "--privileged",
         "--env",
-        "DISPLAY"
+        "DISPLAY=host.docker.internal:0"
     ],
     "postCreateCommand": "uv venv && uv sync",
     "customizations": {
@@ -34,7 +36,8 @@
                 "ms-python.python",
                 "njpwerner.autodocstring",
                 "SonarSource.sonarlint-vscode",
-                "tamasfe.even-better-toml"
+                "tamasfe.even-better-toml",
+                "mhutchie.git-graph"
             ]
         }
     }

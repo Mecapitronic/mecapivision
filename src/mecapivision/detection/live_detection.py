@@ -20,6 +20,7 @@ from .._utils import (
 @click.option(
     "--calibration_file",
     "-c",
+    default="chessboard_calib",
     help="File where the camera calibration is stored",
 )
 def cli(calibration_file: str) -> None:

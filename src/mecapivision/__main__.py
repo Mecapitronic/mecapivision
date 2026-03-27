@@ -20,12 +20,12 @@ def display_image(image_name: str, image: MatLike):
 def main():
     print("Hello from mecapivision!")
 
-    chess = detect_corners("images/chessboard.jpg")
-    display_image("chessboard corners", chess)
+    #chess = detect_corners("images/chessboard.jpg")
+    #display_image("chessboard corners", chess)
 
-    tag_id = randint(0, 100)
-    display_image(f"aruco tag {tag_id}", get_aruco_tag(tag_id))
-    detect_aruco("images/aruco_tags_scene.jpg")
+    #tag_id = randint(0, 100)
+    #display_image(f"aruco tag {tag_id}", get_aruco_tag(tag_id))
+    #detect_aruco("images/aruco_tags_scene.jpg")
 
     detect_aruco_camera()
 

@@ -25,11 +25,15 @@ from .._utils import (
     save_camera_calibration,
     open_camera,
 )
-from .record import DEFAULT_NAME, PICTURES_FOLDER
 from .undistort import undistort_image, undistort_livestream
 
-NUM_CHESSBOARD_CORNERS_X = 6
-NUM_CHESSBOARD_CORNERS_Y = 9
+from .._settings import (
+    camera_calibration_file,
+    calibration_folder
+)
+
+NUM_CHESSBOARD_CORNERS_X = 4
+NUM_CHESSBOARD_CORNERS_Y = 6
 
 
 def calibrate_fake_camera() -> None:
@@ -41,9 +45,9 @@ def calibrate_fake_camera() -> None:
         image_path (str, optional): path to the image to undistort. Defaults to DEFAULT_IMAGE.
     """
     logger.info("Calibrating fake camera from pictures")
-    images_folder: str = "images/"
+    images_folder: str = "images"
     images_base_name: str = "left"
-    images = glob(f"{images_folder}{images_base_name}*.jpg")
+    images = glob(f"{images_folder}/{images_base_name}*.jpg")
 
     objpoints, imgpoints, imgsize = analyse_chessboard_pictures(images)
     mtx, dist = calibrate_from_pictures(objpoints, imgpoints, imgsize)
@@ -57,6 +61,7 @@ def calibrate_fake_camera() -> None:
 @click.option(
     "--calibration_file_path",
     "-c",
+    default="chessboard_calib",
     help="Path to the file where the calibration will be saved",
 )
 def calibrate_camera_from_pictures(calibration_file_path: str) -> None:
@@ -67,7 +72,9 @@ def calibrate_camera_from_pictures(calibration_file_path: str) -> None:
         calibration_file_path (str): path to the file where the calibration will be saved
     """
     logger.info("Calibrating camera from pictures")
-    images = glob(f"{PICTURES_FOLDER}{DEFAULT_NAME}*.jpg")
+    images_folder: str = "my_calib"
+    images_base_name: str = "chessboard"
+    images = glob(f"{images_folder}/{images_base_name}*.jpg")
 
     objpoints, imgpoints, imgsize = analyse_chessboard_pictures(images)
     mtx, dist = calibrate_from_pictures(objpoints, imgpoints, imgsize)
@@ -161,7 +168,12 @@ def analyse_chessboards_live(
             + cv.CALIB_CB_NORMALIZE_IMAGE
         )
         ret, corners = cv.findChessboardCorners(
-            gray, (9, NUM_CHESSBOARD_CORNERS_X), flags=flags
+            gray,
+            (
+                NUM_CHESSBOARD_CORNERS_Y,
+                NUM_CHESSBOARD_CORNERS_X
+            ),
+            flags=flags
         )
 
         # If found, add object points, image points (after refining them)
@@ -182,7 +194,7 @@ def analyse_chessboards_live(
                 logger.info(f"Picture {nb_pictures_taken} taken")
 
         else:
-            logger.warning("Chessboard not found")
+            #logger.warning("Chessboard not found")
             cv.imshow("detection", image)
 
         if cv.waitKey(20) & 0xFF == ord("q"):
@@ -239,7 +251,7 @@ def calibrate_from_pictures(
 
 def analyse_chessboard_pictures(
     images_paths_list: list[str],
-    display: bool = False,
+    display: bool = True,
 ) -> tuple[list[np.ndarray], list[np.ndarray], Sequence[int]]:
     logger.info("Analysing chessboard pictures")
 
@@ -307,7 +319,7 @@ def analyse_chessboard_pictures(
                 ret,
             )
             cv.imshow("img", img)
-            cv.waitKey(500)
+            cv.waitKey(5000)
 
     if missing_images >= len(images_paths_list) * 0.2:
         logger.error(

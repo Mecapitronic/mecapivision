@@ -10,10 +10,6 @@ from ._settings import camera_calibration_file
 
 CANT_RECEIVE_FRAME = "Can't receive frame (stream end)"
 
-PICTURES_FOLDER = "my_calib"
-DEFAULT_NAME = "chessboard"
-
-
 def list_cameras() -> list[str]:
     available_cameras: list[str] = []
 
@@ -57,7 +53,7 @@ def get_last_camera() -> str:
     return available_cameras[-1]
 
 def open_camera(index):
-width = 640
+    width = 640
     height = 480
 
     if platform.system() == "Windows":
@@ -67,14 +63,14 @@ width = 640
     cam = cv.VideoCapture(index, cv.CAP_DSHOW)
     if cam.isOpened():
         print("✅ DSHOW OK")
-cam.set(cv.CAP_PROP_FRAME_WIDTH, width)
+        cam.set(cv.CAP_PROP_FRAME_WIDTH, width)
         cam.set(cv.CAP_PROP_FRAME_HEIGHT, height)
         return cam
 
     # Essai MSMF
     cam = cv.VideoCapture(index, cv.CAP_MSMF)
     if cam.isOpened():
-cam.set(cv.CAP_PROP_FRAME_WIDTH, width)
+        cam.set(cv.CAP_PROP_FRAME_WIDTH, width)
         cam.set(cv.CAP_PROP_FRAME_HEIGHT, height)
         print("✅ MSMF OK")
         return cam
@@ -82,7 +78,7 @@ cam.set(cv.CAP_PROP_FRAME_WIDTH, width)
     # Fallback
     cam = cv.VideoCapture(index)
     if cam.isOpened():
-cam.set(cv.CAP_PROP_FRAME_WIDTH, width)
+        cam.set(cv.CAP_PROP_FRAME_WIDTH, width)
         cam.set(cv.CAP_PROP_FRAME_HEIGHT, height)
         print("✅ DEFAULT OK")
         return cam

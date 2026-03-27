@@ -20,13 +20,13 @@ lint = ["flake8>=7.1.2", "mypy>=1.15.0", "ruff>=0.9.6"]
 test = ["pytest>=8.3.4"]
 
 [project.scripts]
-calibfake = "mecapivision:calibrate_fake_camera"
-caliblive = "mecapivision:calibrate_camera_from_livestream"
-vision = "mecapivision:main"
 record = "mecapivision:record_pictures_cli"
+calibfake = "mecapivision:calibrate_fake_camera"
 calibrate = "mecapivision:calibrate_camera_from_pictures"
-detect = "mecapivision:cli"
+caliblive = "mecapivision:calibrate_camera_from_livestream"
 charuco = "mecapivision:calibrate_charuco"
+vision = "mecapivision:main"
+detect = "mecapivision:cli"
 
 [tool.uv]
 package = true

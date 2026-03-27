@@ -6,12 +6,11 @@ from cv2 import aruco
 from cv2.typing import MatLike
 from loguru import logger
 
-from .._utils import read_parameters, open_camera
-
+from .._utils import read_parameters, open_camera, get_last_camera
 
 def get_aruco_tag(aruco_id: int, size_in_pixels: int = 200) -> MatLike:
     logger.info(f"generating aruco tag for id {aruco_id}")
-    all_aruco_wards: aruco.Dictionary = aruco.getPredefinedDictionary(aruco.DICT_4X4_50)
+    all_aruco_wards: aruco.Dictionary = aruco.getPredefinedDictionary(aruco.DICT_6X6_250)
     marker_image: MatLike = aruco.generateImageMarker(
         all_aruco_wards, aruco_id, size_in_pixels
     )
@@ -154,7 +153,7 @@ def estimate_pose_aruco(
 
 
 def detect_aruco_camera(
-    camera_id: int = 0,
+    camera_id: str = get_last_camera(),
     estimate_pose: bool = True,
     show_rejected: bool = True,
 ) -> None:
@@ -185,7 +184,7 @@ def detect_aruco_camera(
         dtype=np.float32,
     )
 
-    while True:
+    while camera.isOpened():
         # get image from camera
         ret, image = camera.read()
 
@@ -199,8 +198,14 @@ def detect_aruco_camera(
 
         # detect markers and estimate pose
         marker_corners, marker_ids, rejected_candidates = detector.detectMarkers(image)
-        n_markers: int = len(marker_corners)
-        n_ids: int = len(marker_ids)
+        if marker_corners != None:
+            n_markers: int = len(marker_corners)
+        else:
+            n_markers: int = 0
+        if marker_ids != None:
+            n_ids: int = len(marker_ids)
+        else:
+            n_ids: int = 0
 
         # calibration data from tutorial_camera_params.yml
 
@@ -249,10 +254,11 @@ def detect_aruco_camera(
 
         # Display the captured frame
         cv.imshow("Camera", image_copy)
-        cv.waitKey(0)
-        camera.release()
-        cv.destroyAllWindows()
-        del camera
+
+    # cv.waitKey(0)
+    camera.release()
+    cv.destroyAllWindows()
+    del camera
 
 
 if __name__ == "__main__":

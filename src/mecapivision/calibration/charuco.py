@@ -238,9 +238,9 @@ def perspective_function(x, Z, f):
 )
 def calibrate_charuco(img_dir: str) -> None:
     mtx, dst = get_calibration_parameters(img_dir, show_img=False)
-    save_calibration_to_json(mtx, dst, "calibration_webcam_thinkpad.json")
-    mtx, dst = load_calibration(json_file_path="calibration_webcam_thinkpad.json")
-    image = undistort_image("my_calib/my_calibchessboard_14.jpg", mtx, dst)
+    save_calibration_to_json(mtx, dst, "calibration_webcam_msi.json")
+    mtx, dst = load_calibration(json_file_path="calibration_webcam_msi.json")
+    image = undistort_image("my_calib/chessboard_7.jpg", mtx, dst)
     get_charucos_positions(image, mtx, dst)
     cv2.imshow("Undistorted image", image)
     cv2.waitKey(0)
