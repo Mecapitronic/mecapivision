@@ -1,45 +1,85 @@
-# mecapivision
-detection et analyse des éléments du terrain avec une camera
+# MecapiVision
+Détection et localisation de tags ArUco sur le terrain avec une caméra, pour le robot holonome de l'équipe **Mecapitronic** (Coupe de France de Robotique).
 
-## Quick start
-ouvrez dans le devcontainer avec vscode pour que ça soit plus simple.
+## Vue d'ensemble
 
-```python
-uv run main.py
 ```
+Caméra (webcam / Pi Camera)
+        │
+        ▼
+  Calibration (chessboard ou charuco)
+        │
+        ▼
+  Détection ArUco (DICT_6X6_250)
+        │
+        ▼
+  Estimation de pose (solvePnP)
+        │
+        ▼
+  Position x, y du tag dans le repère terrain (mm)
+```
+
+## Commandes disponibles (entry points)
+
+| Commande     | Description                                               |
+|--------------|-----------------------------------------------------------|
+| `record`     | Enregistre des photos du chessboard pour la calibration   |
+| `calibrate`  | Calibre la caméra depuis les photos enregistrées          |
+| `caliblive`  | Calibre la caméra en direct (livestream)                  |
+| `charuco`    | Calibre via une mire ChArUco                              |
+| `detect`     | Lance la détection ArUco en live (avec estimation de pose)|
+| `vision`     | Point d'entrée principal (démo)                           |
+
 
 ## 1. Installation
 
 Il est fortement recommandé d'utiliser un environnement virtuel Python pour exécuter ce projet afin d'isoler les dépendances de **mecapivision**.
 
-### 1.1 Créer l'environnement virtuel
+### 1.1 Prérequis
+
+- Python **3.10+** (vérifier avec `python --version`)
+- Webcam disponible
+
+### 1.2 Cloner le projet
+
+```bash
+git clone https://github.com/Mecapitronic/mecapivision.git
+cd mecapivision
+```
+
+### 1.3 Créer l'environnement virtuel
 Ouvrez votre terminal à la racine du projet et exécutez la commande correspondant à votre système :
 
 ```bash
-  python -m venv venv
+  python -m venv .venv
 ```
 
-### 1.2 Activer l'environnement virtuel
+### 1.4 Activer l'environnement virtuel
 ```bash
 .\.venv\Scripts\activate
 ```
 Une fois activé, vous devriez voir le préfixe (venv) apparaître au tout début de la ligne de votre terminal.
 
-### 1.3 Installer les dépendances
+### 1.5 Installer les dépendances
 ```bash
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-### 1.4 Installer le package mecapivision
+### 1.6 Installer le package mecapivision
 ```bash
-pip install .
+pip install -e .
 ```
+> L'option `-e` installe le package en mode *editable* : les modifications du code sont prises en compte immédiatement, sans réinstaller.
 
-### 1.5 Utiliser le package mecapivision
 
+
+
+
+
+</br></br></br></br></br></br></br></br></br></br>
 ## Installation on RPi
-[source](https://pyimagesearch.com/2018/09/19/pip-install-opencv/)
+[source : https://pyimagesearch.com/2018/09/19/pip-install-opencv/](https://pyimagesearch.com/2018/09/19/pip-install-opencv/)
 
 Install pre-requisites
 ```bash
